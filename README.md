@@ -24,7 +24,7 @@ Takes a predicate and returns a promise.
 #### Examples
 
 ```javascript
-angular.module('myApp', ['awulder.prismic-io']
+angular.module('myApp', ['awulder.prismic-io']);
 ```
 
 ## License
