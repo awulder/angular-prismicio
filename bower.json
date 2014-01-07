@@ -1,0 +1,12 @@
+{
+  "name": "angular-prismic-io",
+  "version": "0.1.0",
+  "main": "prismic.js",
+  "dependencies": {
+    "angular": "~1.2.6",
+    "prismic.io": "~1.0.5"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.6"
+  }
+}
