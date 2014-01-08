@@ -1,8 +1,10 @@
 {
-  "name": "angular-prismic-io",
   "version": "0.1.0",
-  "author": "Arjan Wulder",
-  "license": "MIT",
+  "name": "angular-prismic-io",
+  "description": "Bower Component for using AngularJS with prismic.io",
+  "author": "Arjan Wulder <arjanwulder@gmail.com>",
+  "filename": "prismic.min.js",
+  "main": "./dist/prismic.min.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/awulder/angular-prismic-io.git"
@@ -10,15 +12,23 @@
   "bugs": {
     "url": "https://github.com/awulder/angular-prismic-io/issues"
   },
-  "main": "prismic.js",
-  "directories": {},
-  "scripts": {
-    "test": "./node_modules/.bin/karma start --browsers PhantomJS --single-run"
+  "engines": {
+    "node": ">= 0.10"
   },
   "dependencies": {},
   "devDependencies": {
-    "karma": "~0.10.2",
-    "karma-jasmine": "~0.1.3",
-    "karma-phantomjs-launcher": "~0.1.0"
-  }
+    "grunt-cli": ">= 0.1.7",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-bower": "*",
+    "grunt-bower-task": "*",
+    "grunt-karma": "latest",
+    "grunt-conventional-changelog": "0.0.12",
+    "grunt-zip": "*"
+  },
+  "scripts": {
+    "test": "grunt travis --verbose"
+  },
+  "license": "MIT"
 }

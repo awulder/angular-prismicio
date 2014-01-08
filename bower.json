@@ -1,12 +1,20 @@
 {
-  "name": "angular-prismic-io",
   "version": "0.1.0",
-  "main": "prismic.js",
+  "name": "angular-prismic-io",
+  "description": "Bower Component for using AngularJS with prismic.io",
+  "main": "./dist/prismic.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awulder/angular-prismic-io.git"
+  },
   "dependencies": {
     "angular": "~1.2.6",
     "prismic.io": "~1.0.5"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.6"
-  }
+  },
+  "ignore": [
+    "node_modules"
+  ]
 }

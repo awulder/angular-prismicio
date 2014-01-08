@@ -1,4 +1,7 @@
-# angular-prismic-io [![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io)
+# angular-prismic-io
+
+[![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io)
+
 Bower Component for using AngularJS with [prismic.io](http://prismic.io/).
 
 ## Install
