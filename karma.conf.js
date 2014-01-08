@@ -5,8 +5,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['jasmine'],
     files: [
-      'http://code.angularjs.org/1.2.8/angular.js',
-      'http://code.angularjs.org/1.2.8/angular-mocks.js',
+      'http://code.angularjs.org/1.2.7/angular.js',
+      'http://code.angularjs.org/1.2.7/angular-mocks.js',
       'src/prismic.js',
       'test/*.js'
     ],

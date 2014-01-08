@@ -1,6 +1,6 @@
 'use strict';
 
-describe('prismicFactory', function() {
+describe('prismi', function() {
 
   beforeEach(module('awulder.prismic-io'));
 
