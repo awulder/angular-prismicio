@@ -1,6 +1,6 @@
 # angular-prismic-io
 
-[![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io)
+[![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io) [![Analytics](https://ga-beacon.appspot.com/UA-43175169-2/angular-prismic-io/README)](https://github.com/igrigorik/ga-beacon)
 
 Component for using AngularJS with [prismic.io](http://prismic.io/).
 
