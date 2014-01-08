@@ -37,7 +37,7 @@ module.exports = function(grunt) {
       }
     },
     zip: {
-      '<%= dirs.dest %>/prismic.zip': ['<%= dirs.dest %>/<%= pkg.name %>.js', '<%= dirs.dest %>/<%= pkg.name %>.min.js']
+      '<%= dirs.dest %>/angular-prismic-io.zip': ['<%= dirs.dest %>/<%= pkg.name %>.js', '<%= dirs.dest %>/<%= pkg.name %>.min.js']
     },
     bowerInstall: {
       install: {
@@ -86,7 +86,7 @@ module.exports = function(grunt) {
       travis: {
         singleRun: true,
         autoWatch: false,
-        browsers: ['Firefox']
+        browsers: ['PhantomJS']
       },
       dev: {
         autoWatch: true
@@ -100,7 +100,8 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('build', ['bowerInstall', 'karma:build', 'concat', 'uglify', 'zip']);
+  grunt.registerTask('build', ['bowerInstall', 'karma:build', 'jshint', 'concat', 'uglify', 'zip']);
+  grunt.registerTask('quality', ['bowerInstall', 'karma:build', 'jshint']);
   grunt.registerTask('test', ['karma:build']);
   grunt.registerTask('travis', ['karma:travis']);
   grunt.registerTask('bump', 'Increment version number', function() {
