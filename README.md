@@ -2,33 +2,63 @@
 
 [![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io)
 
-Bower Component for using AngularJS with [prismic.io](http://prismic.io/).
+Component for using AngularJS with [prismic.io](http://prismic.io/).
 
-## Install
+## How do I add this to my project?
 
-1. `bower install angular-prismic-io` or [download the zip](https://github.com/awulder/angular-prismic-io/archive/master.zip).
+You can download this by:
+
+* Using bower and running `bower install angular-prismic-io`
+* Using npm and running `npm install angular-prismic-io`
+* Downloading it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.min.js)
+
+## Dependencies
+
+angular-prismic-io depends on Angular and Lodash (or Underscore).
 
 ## Usage
 
-## API
+### Configuring angular-prismic-io
 
-### `prismic.getDocument`
-Takes id and returns a promise
+#### Properties
+angular-prismic-io comes with a default LinkResolver.
 
-### `prismic.getDocuments`
-Takes an array of id's and returns a promise.
+##### setApiEndPoint
+The API end point for all calls to your prismic.io instance.
 
-### `prismic.getBookmark`
-Takes bookmark and returns a promise
+##### setAccessToken
+Blaa
 
-### `prismic.query` (NOT IMPLEMENTED YET)
-Takes a predicate and returns a promise.
+##### setClientId
+blaa
 
-#### Examples
+##### setClientSecret
+blaaa
 
-```javascript
-angular.module('myApp', ['awulder.prismic-io']);
-```
+##### setLinkResolver
+bla
+
+#### How to configure them globally
+
+##### Configuring in the `config`
+````javascript
+app.config(function(PrismicProvider) {
+    PrismicProvider.setApiEndPoint('http://www.prismic.io/api');
+    PrismicProvider.setAccessToken('');
+    PrismicProvider.setClientId('');
+    PrismicProvider.setClientSecret('');
+    RestangularProvider.setLinkResolver(function(ctx, doc) {
+        return 'detail.html?id=' + doc.id + '&slug=' + doc.slug + ctx.maybeRefParam;
+    });
+});
+
+### Methods description
+These are the methods that can be called on the Prismic object:
+* **all()**:
+* **query(predicate)**:
+* **document(id)**:
+* **documents(ids)**:
+* **bookmark(bookmark)**:
 
 ## License
 MIT
