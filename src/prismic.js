@@ -1,115 +1,167 @@
+/* global _ */
+
 'use strict';
 
 (function() {
 
-  var module = angular.module('awulder.prismic-io', []);
+  var module = angular.module('prismic.io', []);
 
   module.provider('Prismic', function() {
+    var Configurer = {};
+    Configurer.init = function(object, config) {
+      object.configuration = config;
+
+      config.apiEndPoint = _.isUndefined(config.apiEndPoint) ? '' : config.apiEndPoint;
+      object.setApiEndPoint = function(apiEndPoint) {
+        config.apiEndPoint = apiEndPoint;
+      };
+
+      config.accessToken = _.isUndefined(config.accessToken) ? '' : config.accessToken;
+      object.setAccessToken = function(accessToken) {
+        config.accessToken = accessToken;
+      };
+
+      config.clientId = _.isUndefined(config.clientId) ? '' : config.clientId;
+      object.setClientId = function(clientId) {
+        config.clientId = clientId;
+      };
+
+      config.clientSecret = _.isUndefined(config.clientSecret) ? '' : config.clientSecret;
+      object.setClientSecret = function(clientSecret) {
+        config.clientSecret = clientSecret;
+      };
+
+      config.linkResolver = _.isUndefined(config.linkResolver) ? angular.noop : config.linkResolver;
+      object.setLinkResolver = function(linkResolver) {
+        config.linkResolver = linkResolver;
+      };
+    };
+
+    var globalConfiguration = {};
+
+    Configurer.init(this, globalConfiguration);
+
     this.$get = ['$window', '$http', '$q', function($window, $http, $q) {
 
-      var defaultRequestHandler = function(url, callback) {
-        $http.get(url).then(function(response) {
-          callback(response.data)
-        });
-      };
+      function createService(config) {
+        var service = {};
+        var prismic = $window.Prismic;
 
-      var defaultLinkResolver = function(ctx, doc) {
-        return 'detail.html?id=' + doc.id + '&slug=' + doc.slug + ctx.maybeRefParam;
-      };
-
-      var parseQS = function(query) {
-        var params = {},
-          match,
-          pl = /\+/g,
-          search = /([^&=]+)=?([^&]*)/g,
-          decode = function(s) {
-            return decodeURIComponent(s.replace(pl, " "));
-          };
-
-        while (match = search.exec(query)) {
-          params[decode(match[1])] = decode(match[2]);
+        function getApiHome(callback) {
+          prismic.Api(config.apiEndPoint, callback, config.accessToken, config.requestHandler);
         }
-        return params;
-      };
 
-      return function prismicFactory(options) {
-        options = options || {};
-        var prismic = options.prismic || $window.Prismic;
-        var requestHandler = options.requestHandler || defaultRequestHandler;
-        var apiEndPoint = options.apiEndPoint || '';
-        var accessToken = options.accessToken || '';
-        var linkResolver = options.linkResolver || defaultLinkResolver;
-        // var clientId = options.clientId || '';
-        // var clientSecret = options.clientSecret || '';
-
-        var getApiHome = function(callback) {
-          prismic.Api(apiEndPoint, callback, accessToken, requestHandler);
-        };
-
-        var buildContext = function(ref, callback) {
+        function buildContext(ref, callback) {
           getApiHome(function(api) {
             var ctx = {
               ref: (ref || api.data.master.ref),
               api: api,
-              maybeRef: (ref && ref != api.data.master.ref ? ref : ''),
-              maybeRefParam: (ref && ref != api.data.master.ref ? '&ref=' + ref : ''),
+              maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
+              maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
               oauth: function() {
                 return {
-                  accessToken: accessToken,
-                  hasPrivilegedAccess: !!accessToken
-                }
+                  accessToken: config.accessToken,
+                  hasPrivilegedAccess: !!config.accessToken
+                };
               },
-              linkResolver: linkResolver
+              linkResolver: config.linkResolver
             };
             callback(ctx);
           });
-        };
+        }
 
-        var withPrismic = function(callback) {
+        function withPrismic(callback) {
           buildContext(queryString['ref'], function(ctx) {
-            callback.apply($window, [ctx]);
+            callback.call($window, ctx);
           });
-        };
+        }
+
+        function parseQS(query) {
+          var params = {},
+            match,
+            pl = /\+/g,
+            search = /([^&=]+)=?([^&]*)/g,
+            decode = function(s) {
+              return decodeURIComponent(s.replace(pl, " "));
+            };
+
+          while (match = search.exec(query)) {
+            params[decode(match[1])] = decode(match[2]);
+          }
+          return params;
+        }
 
         var queryString = parseQS($window.location.search.substring(1));
+//        var encodedHash = parseQS($window.location.hash.substring(1));
 
-        var encodedHash = parseQS($window.location.hash.substring(1));
+        function all() {
+          var deferred = $q.defer();
+          withPrismic(function(ctx) {
+            ctx.api.form('everything').ref(ctx.ref).submit(function(docs) {
+              deferred.resolve(docs);
+            });
+          });
+          return deferred.promise;
+        }
 
-        return {
-          getDocument: function(id) {
-            var deferred = $q.defer();
+        function query(predicate) {
+          var deferred = $q.defer();
+          withPrismic(function(ctx) {
+            ctx.api.forms('everything').ref(ctx.ref).query(predicate).submit(function(docs) {
+              deferred.resolve(docs);
+            });
+          });
+          return deferred.promise;
+        }
+
+        function document(id) {
+          var deferred = $q.defer();
+          withPrismic(function(ctx) {
+            ctx.api.forms('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(docs) {
+              deferred.resolve(_.first(docs));
+            });
+          });
+          return deferred.promise;
+        }
+
+        function documents(ids) {
+          var deferred = $q.defer();
+          if (ids && ids.length) {
             withPrismic(function(ctx) {
-              ctx.api.forms('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(results) {
-                deferred.resolve(_.first(results));
+              ctx.api.forms('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + _(ids).map(function(id) {
+                  return '"' + id + '"';
+                }).join(',') + '])]]').submit(function(docs) {
+                deferred.resolve(docs);
               });
             });
-            return deferred.promise;
-          },
-
-          getDocuments: function(ids) {
-            var deferred = $q.defer();
-            if (ids && ids.length) {
-              withPrismic(function(ctx) {
-                ctx.api.forms('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + _(ids).map(function(id) {
-                    return '"' + id + '"';
-                  }).join(',') + '])]]').submit(function(results) {
-                  deferred.resolve(results);
-                });
-              });
-            }
-            return deferred.promise;
-          },
-
-          getBookmark: function(bookmark) {
-            var deferred = $q.defer();
-            var id = ctx.api.bookmarks[bookmark];
-            if (id) {
-              this.getDocument(id);
-            }
-            return deferred.promise;
           }
-        };
-      };
-    }]
+          return deferred.promise;
+        }
+
+        function bookmarked(bookmark) {
+          var deferred = $q.defer();
+          withPrismic(function(ctx) {
+            ctx.api.bookmarks[bookmark].submit(function(docs) {
+              deferred.resolve(_.first(docs));
+            });
+          });
+
+          var promise = deferred.promise;
+          promise.then(function(id) {
+            return document(id);
+          });
+        }
+
+        Configurer.init(service, config);
+        service.all = _.bind(all, service);
+        service.query = _.bind(query, service);
+        service.document = _.bind(document, service);
+        service.documents = _.bind(documents, service);
+        service.bookmark = _.bind(bookmarked, service);
+        return service;
+      }
+
+      return createService(globalConfiguration);
+    }];
   });
 })();
