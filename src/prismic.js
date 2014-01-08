@@ -1,7 +1,10 @@
 'use strict';
 
-angular.module('awulder.prismic-io', [])
-  .provider('Prismic', function() {
+(function() {
+
+  var module = angular.module('awulder.prismic-io', []);
+
+  module.provider('Prismic', function() {
     this.$get = ['$window', '$http', '$q', function($window, $http, $q) {
 
       var defaultRequestHandler = function(url, callback) {
@@ -109,3 +112,4 @@ angular.module('awulder.prismic-io', [])
       };
     }]
   });
+})();
