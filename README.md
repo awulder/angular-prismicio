@@ -51,6 +51,7 @@ app.config(function(PrismicProvider) {
         return 'detail.html?id=' + doc.id + '&slug=' + doc.slug + ctx.maybeRefParam;
     });
 });
+````
 
 ### Methods description
 These are the methods that can be called on the Prismic object:
