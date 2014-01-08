@@ -24,19 +24,14 @@ angular-prismic-io depends on Angular and Lodash (or Underscore).
 angular-prismic-io comes with a default LinkResolver.
 
 ##### setApiEndPoint
-The API end point for all calls to your prismic.io instance.
 
 ##### setAccessToken
-Blaa
 
 ##### setClientId
-blaa
 
 ##### setClientSecret
-blaaa
 
 ##### setLinkResolver
-bla
 
 #### How to configure them globally
 
