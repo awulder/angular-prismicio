@@ -32,7 +32,7 @@ app.config(function(PrismicProvider) {
     PrismicProvider.setAccessToken('');
     PrismicProvider.setClientId('');
     PrismicProvider.setClientSecret('');
-    RestangularProvider.setLinkResolver(function(ctx, doc) {
+    PrismicProvider.setLinkResolver(function(ctx, doc) {
         return 'detail.html?id=' + doc.id + '&slug=' + doc.slug + ctx.maybeRefParam;
     });
 });
@@ -45,7 +45,7 @@ app.controller('AppCtrl', ['Prismic', function(Prismic) {
     Prismic.all().then(function(data) {
         self.data = data;
     });
-});
+}]);
 ````
 
 ## Documentation
