@@ -103,6 +103,7 @@ module.exports = function(grunt) {
   grunt.registerTask('build', ['bowerInstall', 'karma:build', 'jshint', 'concat', 'uglify', 'zip']);
   grunt.registerTask('quality', ['bowerInstall', 'karma:build', 'jshint']);
   grunt.registerTask('test', ['karma:build']);
+  grunt.registerTask('testDebug', ['karma:dev']);
   grunt.registerTask('travis', ['karma:travis']);
   grunt.registerTask('bump', 'Increment version number', function() {
     var versionType = grunt.option('type');
