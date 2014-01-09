@@ -14,7 +14,7 @@ You can download this by:
 
 ## Dependencies
 
-angular-prismic-io depends on [Angular](http://angularjs.org/) and [Underscore](http://requirejs.org).
+angular-prismic-io depends on [Angular](http://angularjs.org/) and [Underscore](http://underscorejs.org/).
 
 ## Usage instructions
 
