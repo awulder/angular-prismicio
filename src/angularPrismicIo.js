@@ -110,10 +110,10 @@
           return deferred.promise;
         }
 
-        function query(predicate) {
+        function query(predicateBasedQuery) {
           var deferred = $q.defer();
           withPrismic(function(ctx) {
-            ctx.api.forms('everything').ref(ctx.ref).query(predicate).submit(function(docs) {
+            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(docs) {
               deferred.resolve(docs);
             });
           });

@@ -53,7 +53,7 @@ app.controller('AppCtrl', ['Prismic', function(Prismic) {
 ## Documentation
 These are the methods that can be called on the `Prismic` object:
 * `Prismic.all()`
-* `Prismic.query(predicate)`
+* `Prismic.query(predicateBasedQueryString)`
 * `Prismic.document(idString)`
 * `Prismic.documents(idsArray)`
 * `Prismic.bookmark(bookmarkString)`
