@@ -8,8 +8,6 @@ Component for using AngularJS with [prismic.io](http://prismic.io/).
 
 You can download this by:
 
-* Using bower and running `bower install angular-prismic-io`
-* Using npm and running `npm install angular-prismic-io`
 * Downloading it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.min.js)
 
 ## Dependencies
