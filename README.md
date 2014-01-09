@@ -14,31 +14,23 @@ You can download this by:
 
 ## Dependencies
 
-angular-prismic-io depends on Angular and Lodash (or Underscore).
+angular-prismic-io depends on [Angular](http://angularjs.org/) and [Underscore](http://requirejs.org).
 
-## Usage
+## Usage instructions
 
-### Configuring angular-prismic-io
+First you need to configure the `PrismicProvider`. You can configure the following parameters where the API Endpoint is mandatory.
 
-#### Properties
-angular-prismic-io comes with a default LinkResolver.
+* API Endpoint (`setApiEndpoint`)
+* Access token if the Master is not open (`setAccessToken`)
+* OAuth (`setClientId`, `setClientSecret`)
+* Links resolution rules (`setLinkResolver`)
 
-##### setApiEndPoint
-
-##### setAccessToken
-
-##### setClientId
-
-##### setClientSecret
-
-##### setLinkResolver
-
-#### How to configure them globally
-
-##### Configuring in the `config`
+You can configure the `PrismicProvider` in the `config`
 ````javascript
+var app = angular.module('app', ['prismic.io']);
+
 app.config(function(PrismicProvider) {
-    PrismicProvider.setApiEndPoint('http://www.prismic.io/api');
+    PrismicProvider.setApiEndpoint('https://lesbonneschoses.prismic.io/api');
     PrismicProvider.setAccessToken('');
     PrismicProvider.setClientId('');
     PrismicProvider.setClientSecret('');
@@ -48,13 +40,23 @@ app.config(function(PrismicProvider) {
 });
 ````
 
-### Methods description
-These are the methods that can be called on the Prismic object:
-* **all()**:
-* **query(predicate)**:
-* **document(id)**:
-* **documents(ids)**:
-* **bookmark(bookmark)**:
+As soon as the above is done you are ready to inject `PrismicProvider` in your services and controllers:
+````javascript
+app.controller('AppCtrl', ['Prismic', function(Prismic) {
+    var self = this;
+    Prismic.all().then(function(data) {
+        self.data = data;
+    });
+});
+````
+
+## Documentation
+These are the methods that can be called on the `Prismic` object:
+* `Prismic.all()`
+* `Prismic.query(predicate)`
+* `Prismic.document(idString)`
+* `Prismic.documents(idsArray)`
+* `Prismic.bookmark(bookmarkString)`
 
 ## License
 MIT
