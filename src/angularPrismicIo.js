@@ -11,9 +11,9 @@
     Configurer.init = function(object, config) {
       object.configuration = config;
 
-      config.apiEndPoint = _.isUndefined(config.apiEndPoint) ? '' : config.apiEndPoint;
-      object.setApiEndPoint = function(apiEndPoint) {
-        config.apiEndPoint = apiEndPoint;
+      config.apiEndpoint = _.isUndefined(config.apiEndpoint) ? '' : config.apiEndpoint;
+      object.setApiEndpoint = function(apiEndpoint) {
+        config.apiEndpoint = apiEndpoint;
       };
 
       config.accessToken = _.isUndefined(config.accessToken) ? '' : config.accessToken;
@@ -47,8 +47,14 @@
         var service = {};
         var prismic = $window.Prismic;
 
+        function requestHandler(url, callback) {
+          $http.get(url).then(function(response) {
+            callback(response.data);
+          });
+        }
+
         function getApiHome(callback) {
-          prismic.Api(config.apiEndPoint, callback, config.accessToken, config.requestHandler);
+          prismic.Api(config.apiEndpoint, callback, config.accessToken, requestHandler);
         }
 
         function buildContext(ref, callback) {
