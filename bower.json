@@ -1,11 +1,11 @@
 {
   "version": "0.1.0",
-  "name": "angular-prismic-io",
-  "description": "Component for using AngularJS with prismic.io",
-  "main": "./dist/angular-prismic-io.min.js",
+  "name": "angular-prismicio",
+  "description": "AngularJS service for prismic.io",
+  "main": "./dist/angular-prismicio.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awulder/angular-prismic-io.git"
+    "url": "https://github.com/awulder/angular-prismicio.git"
   },
   "dependencies": {
     "angular": "1.2.7",

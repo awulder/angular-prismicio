@@ -1,16 +1,16 @@
-# angular-prismic-io
+# angular-prismicio
 
-[![Build Status](https://travis-ci.org/awulder/angular-prismic-io.png?branch=master)](https://travis-ci.org/awulder/angular-prismic-io) [![Analytics](https://ga-beacon.appspot.com/UA-43175169-2/angular-prismic-io/readme)](https://github.com/igrigorik/ga-beacon)
+[![Build Status](https://travis-ci.org/awulder/angular-prismicio.png?branch=master)](https://travis-ci.org/awulder/angular-prismicio) [![Analytics](https://ga-beacon.appspot.com/UA-43175169-2/angular-prismicio/readme)](https://github.com/igrigorik/ga-beacon)
 
-Component for using AngularJS with [prismic.io](http://prismic.io/).
+AngularJS service for [prismic.io](http://prismic.io/).
 
 ## How do I add this to my project?
 
-You can download it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.min.js)
+You can download it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismicio/master/dist/angular-prismicio.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismicio/master/dist/angular-prismicio.min.js)
 
 ## Dependencies
 
-angular-prismic-io depends on [Angular](http://angularjs.org/) and [Underscore](http://underscorejs.org/).
+angular-prismicio depends on [Angular](http://angularjs.org/) and [Underscore](http://underscorejs.org/).
 
 ## Usage instructions
 

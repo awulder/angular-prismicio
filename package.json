@@ -1,16 +1,16 @@
 {
   "version": "0.1.0",
-  "name": "angular-prismic-io",
-  "description": "Component for using AngularJS with prismic.io",
+  "name": "angular-prismicio",
+  "description": "AngularJS service for prismic.io",
   "author": "Arjan Wulder <arjanwulder@gmail.com>",
-  "filename": "angular-prismic-io.min.js",
-  "main": "./dist/angular-prismic-io.min.js",
+  "filename": "angular-prismicio.min.js",
+  "main": "./dist/angular-prismicio.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awulder/angular-prismic-io.git"
+    "url": "https://github.com/awulder/angular-prismicio.git"
   },
   "bugs": {
-    "url": "https://github.com/awulder/angular-prismic-io/issues"
+    "url": "https://github.com/awulder/angular-prismicio/issues"
   },
   "engines": {
     "node": ">= 0.10"

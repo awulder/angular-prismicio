@@ -145,16 +145,14 @@
         }
 
         function bookmarked(bookmark) {
-          var deferred = $q.defer();
+          var id;
           withPrismic(function(ctx) {
-            ctx.api.bookmarks[bookmark].submit(function(docs) {
-              deferred.resolve(_.first(docs));
-            });
-          });
-
-          var promise = deferred.promise;
-          promise.then(function(id) {
-            return document(id);
+            id = ctx.api.bookmarks[bookmark];
+            if (id) {
+              return document(id);
+            } else {
+              return $q.promise;
+            }
           });
         }
 
