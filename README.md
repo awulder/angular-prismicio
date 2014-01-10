@@ -54,5 +54,8 @@ These are the methods that can be called on the `Prismic` object:
 * `Prismic.documents(idsArray)`
 * `Prismic.bookmark(bookmarkString)`
 
+## Contributting
+New contributions are always welcomed. Just open a pull request making sure that it contains tests and documentation updates.
+
 ## License
 MIT
