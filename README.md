@@ -6,9 +6,7 @@ Component for using AngularJS with [prismic.io](http://prismic.io/).
 
 ## How do I add this to my project?
 
-You can download this by:
-
-* Downloading it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.min.js)
+You can download it manually by clicking [here to download development unminified version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.js) or [here to download minified production version](https://raw.github.com/awulder/angular-prismic-io/master/dist/angular-prismic-io.min.js)
 
 ## Dependencies
 
