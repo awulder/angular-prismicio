@@ -1,5 +1,5 @@
 /**
- * Component for using AngularJS with prismic.io
+ * AngularJS service for prismic.io
  * @version v0.1.0 - 2014-01-10
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
@@ -117,10 +117,10 @@
           return deferred.promise;
         }
 
-        function query(predicate) {
+        function query(predicateBasedQuery) {
           var deferred = $q.defer();
           withPrismic(function(ctx) {
-            ctx.api.forms('everything').ref(ctx.ref).query(predicate).submit(function(docs) {
+            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(docs) {
               deferred.resolve(docs);
             });
           });
@@ -152,16 +152,14 @@
         }
 
         function bookmarked(bookmark) {
-          var deferred = $q.defer();
+          var id;
           withPrismic(function(ctx) {
-            ctx.api.bookmarks[bookmark].submit(function(docs) {
-              deferred.resolve(_.first(docs));
-            });
-          });
-
-          var promise = deferred.promise;
-          promise.then(function(id) {
-            return document(id);
+            id = ctx.api.bookmarks[bookmark];
+            if (id) {
+              return document(id);
+            } else {
+              return $q.promise;
+            }
           });
         }
 
