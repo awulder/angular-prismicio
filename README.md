@@ -10,7 +10,7 @@ You can download it manually by clicking [here to download development unminifie
 
 ## Dependencies
 
-angular-prismicio depends on [Angular](http://angularjs.org/) and [Underscore](http://underscorejs.org/).
+angular-prismicio depends on [Angular](http://angularjs.org/).
 
 ## Usage instructions
 
