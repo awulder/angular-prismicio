@@ -1,44 +1,41 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-01-10
+ * @version v0.1.0 - 2014-05-07
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
-/* global _ */
+/* global */
 
 'use strict';
 
-(function() {
-
-  var module = angular.module('prismic.io', []);
-
-  module.provider('Prismic', function() {
+angular.module('prismic.io', [])
+  .provider('Prismic', function() {
     var Configurer = {};
     Configurer.init = function(object, config) {
       object.configuration = config;
 
-      config.apiEndpoint = _.isUndefined(config.apiEndpoint) ? '' : config.apiEndpoint;
+      config.apiEndpoint = angular.isUndefined(config.apiEndpoint) ? '' : config.apiEndpoint;
       object.setApiEndpoint = function(apiEndpoint) {
         config.apiEndpoint = apiEndpoint;
       };
 
-      config.accessToken = _.isUndefined(config.accessToken) ? '' : config.accessToken;
+      config.accessToken = angular.isUndefined(config.accessToken) ? '' : config.accessToken;
       object.setAccessToken = function(accessToken) {
         config.accessToken = accessToken;
       };
 
-      config.clientId = _.isUndefined(config.clientId) ? '' : config.clientId;
+      config.clientId = angular.isUndefined(config.clientId) ? '' : config.clientId;
       object.setClientId = function(clientId) {
         config.clientId = clientId;
       };
 
-      config.clientSecret = _.isUndefined(config.clientSecret) ? '' : config.clientSecret;
+      config.clientSecret = angular.isUndefined(config.clientSecret) ? '' : config.clientSecret;
       object.setClientSecret = function(clientSecret) {
         config.clientSecret = clientSecret;
       };
 
-      config.linkResolver = _.isUndefined(config.linkResolver) ? angular.noop : config.linkResolver;
+      config.linkResolver = angular.isUndefined(config.linkResolver) ? angular.noop : config.linkResolver;
       object.setLinkResolver = function(linkResolver) {
         config.linkResolver = linkResolver;
       };
@@ -55,9 +52,13 @@
         var prismic = $window.Prismic;
 
         function requestHandler(url, callback) {
-          $http.get(url).then(function(response) {
-            callback(response.data);
-          });
+          $http.get(url).then(
+            function(response) {
+              callback(null, response.data);
+            },
+            function(error) {
+              callback(error, null);
+            });
         }
 
         function getApiHome(callback) {
@@ -65,7 +66,7 @@
         }
 
         function buildContext(ref, callback) {
-          getApiHome(function(api) {
+          getApiHome(function(error, api) {
             var ctx = {
               ref: (ref || api.data.master.ref),
               api: api,
@@ -85,7 +86,7 @@
 
         function withPrismic(callback) {
           buildContext(queryString['ref'], function(ctx) {
-            callback.call($window, ctx);
+            callback(ctx);
           });
         }
 
@@ -110,7 +111,7 @@
         function all() {
           var deferred = $q.defer();
           withPrismic(function(ctx) {
-            ctx.api.form('everything').ref(ctx.ref).submit(function(docs) {
+            ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
               deferred.resolve(docs);
             });
           });
@@ -120,7 +121,7 @@
         function query(predicateBasedQuery) {
           var deferred = $q.defer();
           withPrismic(function(ctx) {
-            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(docs) {
+            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
               deferred.resolve(docs);
             });
           });
@@ -130,8 +131,8 @@
         function document(id) {
           var deferred = $q.defer();
           withPrismic(function(ctx) {
-            ctx.api.forms('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(docs) {
-              deferred.resolve(_.first(docs));
+            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
+              deferred.resolve(docs ? docs[0] : undefined);
             });
           });
           return deferred.promise;
@@ -141,7 +142,7 @@
           var deferred = $q.defer();
           if (ids && ids.length) {
             withPrismic(function(ctx) {
-              ctx.api.forms('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + _(ids).map(function(id) {
+              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
                   return '"' + id + '"';
                 }).join(',') + '])]]').submit(function(docs) {
                 deferred.resolve(docs);
@@ -164,15 +165,14 @@
         }
 
         Configurer.init(service, config);
-        service.all = _.bind(all, service);
-        service.query = _.bind(query, service);
-        service.document = _.bind(document, service);
-        service.documents = _.bind(documents, service);
-        service.bookmark = _.bind(bookmarked, service);
+        service.all = all;
+        service.query = query;
+        service.document = document;
+        service.documents = documents;
+        service.bookmark = bookmarked;
         return service;
       }
 
       return createService(globalConfiguration);
     }];
   });
-})();

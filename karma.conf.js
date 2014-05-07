@@ -7,8 +7,7 @@ module.exports = function(config) {
     files: [
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
-      'bower_components/prismic.io/dist/prismic.io-1.0.5.min.js',
-      'bower_components/underscore/underscore.js',
+      'bower_components/prismic.io/dist/prismic.io.min.js',
       'src/angularPrismicio.js',
       'test/*.js'
     ],
