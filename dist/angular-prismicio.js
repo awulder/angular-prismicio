@@ -50,6 +50,7 @@ angular.module('prismic.io', [])
       function createService(config) {
         var service = {};
         var prismic = $window.Prismic;
+        var context;
 
         function requestHandler(url, callback) {
           $http.get(url).then(
@@ -67,8 +68,9 @@ angular.module('prismic.io', [])
 
         function buildContext(ref, callback) {
           getApiHome(function(error, api) {
+
             if (api) {
-              var ctx = {
+              context = {
                 ref: (ref || api.data.master.ref),
                 api: api,
                 maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
@@ -81,7 +83,7 @@ angular.module('prismic.io', [])
                 },
                 linkResolver: config.linkResolver
               };
-              callback(null, ctx);
+              callback(null, context);
             } else {
               callback(error, null);
             }
@@ -89,9 +91,13 @@ angular.module('prismic.io', [])
         }
 
         function withPrismic(callback) {
-          buildContext(queryString['ref'], function(error, ctx) {
-            callback(error, ctx);
-          });
+          if (!context) {
+            buildContext(queryString['ref'], function(error, ctx) {
+              callback(error, ctx);
+            });
+          } else {
+            callback(null, context);
+          }
         }
 
         function parseQS(query) {
