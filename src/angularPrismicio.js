@@ -28,7 +28,7 @@ angular.module('prismic.io', [])
         config.clientSecret = clientSecret;
       };
 
-      config.linkResolver = angular.isUndefined(config.linkResolver) ? angular.noop : config.linkResolver;
+      config.linkResolver = angular.isUndefined(config.linkResolver) ? function(){} : config.linkResolver;
       object.setLinkResolver = function(linkResolver) {
         config.linkResolver = linkResolver;
       };
@@ -194,4 +194,21 @@ angular.module('prismic.io', [])
 
       return createService(globalConfiguration);
     }];
-  });
+  })
+
+  // The directive uses prismics asHtml and can be used as <prismic-html fragment="data.fragment">
+  .directive('prismicHtml', ['$window', 'Prismic', function($window, Prismic) {
+    return {
+      restrict: 'E',
+      scope: {
+        fragment : '=fragment'
+      },
+      link: function(scope, element, attrs) {
+        var field = $window.Prismic.Fragments.initField(scope.fragment);
+        if(field) {
+          // Use the PrismicProvider configuration for ctx
+          element[0].innerHTML = field.asHtml(Prismic.configuration);
+        }
+      }
+    };
+  }]);
