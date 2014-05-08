@@ -54,6 +54,12 @@ These are the methods that can be called on the `Prismic` object:
 * `Prismic.documents(idsArray)`
 * `Prismic.bookmark(bookmarkString)`
 
+The prismicHtml-directive can be used as follows
+````javascript
+<prismic-html fragment="data.fragment"></prismic-html>
+````
+where 'fragment' is a prismic.io type/value object.
+
 ## Contributting
 New contributions are always welcomed. Just open a pull request making sure that it contains tests and documentation updates.
 
