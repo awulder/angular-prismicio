@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-05-07
+ * @version v0.1.0 - 2014-05-08
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -35,7 +35,7 @@ angular.module('prismic.io', [])
         config.clientSecret = clientSecret;
       };
 
-      config.linkResolver = angular.isUndefined(config.linkResolver) ? angular.noop : config.linkResolver;
+      config.linkResolver = angular.isUndefined(config.linkResolver) ? function(){} : config.linkResolver;
       object.setLinkResolver = function(linkResolver) {
         config.linkResolver = linkResolver;
       };
@@ -50,6 +50,7 @@ angular.module('prismic.io', [])
       function createService(config) {
         var service = {};
         var prismic = $window.Prismic;
+        var context;
 
         function requestHandler(url, callback) {
           $http.get(url).then(
@@ -67,27 +68,36 @@ angular.module('prismic.io', [])
 
         function buildContext(ref, callback) {
           getApiHome(function(error, api) {
-            var ctx = {
-              ref: (ref || api.data.master.ref),
-              api: api,
-              maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
-              maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
-              oauth: function() {
-                return {
-                  accessToken: config.accessToken,
-                  hasPrivilegedAccess: !!config.accessToken
-                };
-              },
-              linkResolver: config.linkResolver
-            };
-            callback(ctx);
+
+            if (api) {
+              context = {
+                ref: (ref || api.data.master.ref),
+                api: api,
+                maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
+                maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
+                oauth: function() {
+                  return {
+                    accessToken: config.accessToken,
+                    hasPrivilegedAccess: !!config.accessToken
+                  };
+                },
+                linkResolver: config.linkResolver
+              };
+              callback(null, context);
+            } else {
+              callback(error, null);
+            }
           });
         }
 
         function withPrismic(callback) {
-          buildContext(queryString['ref'], function(ctx) {
-            callback(ctx);
-          });
+          if (!context) {
+            buildContext(queryString['ref'], function(error, ctx) {
+              callback(error, ctx);
+            });
+          } else {
+            callback(null, context);
+          }
         }
 
         function parseQS(query) {
@@ -110,17 +120,21 @@ angular.module('prismic.io', [])
 
         function all() {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
-            ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-              deferred.resolve(docs);
-            });
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
+                deferred.resolve(docs);
+              });
+            } else {
+              deferred.reject(error);
+            }
           });
           return deferred.promise;
         }
 
         function query(predicateBasedQuery) {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
+          withPrismic(function(error, ctx) {
             ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
               deferred.resolve(docs);
             });
@@ -130,10 +144,14 @@ angular.module('prismic.io', [])
 
         function document(id) {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
-              deferred.resolve(docs ? docs[0] : undefined);
-            });
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
+                deferred.resolve(docs ? docs[0] : undefined);
+              });
+            } else {
+              deferred.reject(error);
+            }
           });
           return deferred.promise;
         }
@@ -141,12 +159,16 @@ angular.module('prismic.io', [])
         function documents(ids) {
           var deferred = $q.defer();
           if (ids && ids.length) {
-            withPrismic(function(ctx) {
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
-                  return '"' + id + '"';
-                }).join(',') + '])]]').submit(function(docs) {
-                deferred.resolve(docs);
-              });
+            withPrismic(function(error, ctx) {
+              if (ctx) {
+                ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
+                    return '"' + id + '"';
+                  }).join(',') + '])]]').submit(function(docs) {
+                  deferred.resolve(docs);
+                });
+              } else {
+                deferred.reject(error);
+              }
             });
           }
           return deferred.promise;
@@ -154,12 +176,16 @@ angular.module('prismic.io', [])
 
         function bookmarked(bookmark) {
           var id;
-          withPrismic(function(ctx) {
-            id = ctx.api.bookmarks[bookmark];
-            if (id) {
-              return document(id);
+          withPrismic(function(ctx, error) {
+            if (ctx) {
+              id = ctx.api.bookmarks[bookmark];
+              if (id) {
+                return document(id);
+              } else {
+                return $q.promise;
+              }
             } else {
-              return $q.promise;
+              $q.reject(error);
             }
           });
         }
@@ -175,4 +201,21 @@ angular.module('prismic.io', [])
 
       return createService(globalConfiguration);
     }];
-  });
+  })
+
+  // The directive uses prismics asHtml and can be used as <prismic-html fragment="data.fragment">
+  .directive('prismicHtml', ['$window', 'Prismic', function($window, Prismic) {
+    return {
+      restrict: 'E',
+      scope: {
+        fragment : '=fragment'
+      },
+      link: function(scope, element, attrs) {
+        var field = $window.Prismic.Fragments.initField(scope.fragment);
+        if(field) {
+          // Use the PrismicProvider configuration for ctx
+          element[0].innerHTML = field.asHtml(Prismic.configuration);
+        }
+      }
+    };
+  }]);

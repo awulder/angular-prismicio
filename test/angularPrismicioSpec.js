@@ -101,12 +101,32 @@ describe('Prismic', function() {
       });
     });
 
+    it('should raise error GET query', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D')
+        .respond(404, "Not found");
+
+      Prismic.query('[:d = at(document.type, "product")]').then(function(queryResult) {
+        result = queryResult;
+        expect(result).toBeUndefined();
+      });
+    });
+
     it('should issue GET all', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
         .respond(searchResponse());
 
       Prismic.all().then(function(queryResult) {
         result = queryResult;
+      });
+    });
+
+    it('should raise error GET all', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
+        .respond(404, "Not found");
+
+      Prismic.all().then(function(queryResult) {
+        result = queryResult;
+        expect(result).toBeUndefined();
       });
     });
 
@@ -140,4 +160,53 @@ describe('Prismic', function() {
 //      });
 //    });
   });
+});
+
+describe('prismicHtml', function() {
+  var $scope, $compile, result;
+  var fragment = function(type, value) {
+    return {
+      "type": type,
+      "value": value
+    }
+  };
+
+  beforeEach(module('prismic.io'));
+
+  beforeEach(inject(function(_$rootScope_, _$compile_) {
+    $scope = _$rootScope_;
+    $compile = _$compile_;
+  }));
+
+  describe('directive method descriptions', function() {
+    var compileDirective = function (markup, scope) {
+      var el = $compile(markup)(scope);
+      scope.$digest();
+      return el;
+    };
+
+    it('should contain <span> when type is Text', function() {
+      $scope.fragment = fragment("Text", "Some value");
+      var textType = compileDirective('<prismic-html fragment="fragment"></prismic-html>', $scope);
+      result = textType[0];
+      expect(result.innerHTML).toContain("<span");
+    });
+
+    it('should contain <img> when type is Image', function() {
+      $scope.fragment = fragment("Image", {
+       main: {
+        alt: "",
+        copyright: "",
+        dimensions: {
+          height: 500,
+          width: 500
+        },
+        url: "https://prismic-io.s3.amazonaws.com/lesbonneschoses/604400b41b2e275ee766bd69b69b33734043aa38.png"
+        }});
+      var imageType = compileDirective('<prismic-html fragment="fragment"></prismic-html>', $scope);
+      result = imageType[0];
+      expect(result.innerHTML).toContain("<img");
+    });
+  });
+
 });
