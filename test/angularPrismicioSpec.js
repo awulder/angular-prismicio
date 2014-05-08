@@ -101,12 +101,32 @@ describe('Prismic', function() {
       });
     });
 
+    it('should raise error GET query', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D')
+        .respond(404, "Not found");
+
+      Prismic.query('[:d = at(document.type, "product")]').then(function(queryResult) {
+        result = queryResult;
+        expect(result).toBeUndefined();
+      });
+    });
+
     it('should issue GET all', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
         .respond(searchResponse());
 
       Prismic.all().then(function(queryResult) {
         result = queryResult;
+      });
+    });
+
+    it('should raise error GET all', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
+        .respond(404, "Not found");
+
+      Prismic.all().then(function(queryResult) {
+        result = queryResult;
+        expect(result).toBeUndefined();
       });
     });
 

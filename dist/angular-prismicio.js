@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-05-07
+ * @version v0.1.0 - 2014-05-08
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -67,26 +67,30 @@ angular.module('prismic.io', [])
 
         function buildContext(ref, callback) {
           getApiHome(function(error, api) {
-            var ctx = {
-              ref: (ref || api.data.master.ref),
-              api: api,
-              maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
-              maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
-              oauth: function() {
-                return {
-                  accessToken: config.accessToken,
-                  hasPrivilegedAccess: !!config.accessToken
-                };
-              },
-              linkResolver: config.linkResolver
-            };
-            callback(ctx);
+            if (api) {
+              var ctx = {
+                ref: (ref || api.data.master.ref),
+                api: api,
+                maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
+                maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
+                oauth: function() {
+                  return {
+                    accessToken: config.accessToken,
+                    hasPrivilegedAccess: !!config.accessToken
+                  };
+                },
+                linkResolver: config.linkResolver
+              };
+              callback(null, ctx);
+            } else {
+              callback(error, null);
+            }
           });
         }
 
         function withPrismic(callback) {
-          buildContext(queryString['ref'], function(ctx) {
-            callback(ctx);
+          buildContext(queryString['ref'], function(error, ctx) {
+            callback(error, ctx);
           });
         }
 
@@ -110,17 +114,21 @@ angular.module('prismic.io', [])
 
         function all() {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
-            ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-              deferred.resolve(docs);
-            });
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
+                deferred.resolve(docs);
+              });
+            } else {
+              deferred.reject(error);
+            }
           });
           return deferred.promise;
         }
 
         function query(predicateBasedQuery) {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
+          withPrismic(function(error, ctx) {
             ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
               deferred.resolve(docs);
             });
@@ -130,10 +138,14 @@ angular.module('prismic.io', [])
 
         function document(id) {
           var deferred = $q.defer();
-          withPrismic(function(ctx) {
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
-              deferred.resolve(docs ? docs[0] : undefined);
-            });
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
+                deferred.resolve(docs ? docs[0] : undefined);
+              });
+            } else {
+              deferred.reject(error);
+            }
           });
           return deferred.promise;
         }
@@ -141,12 +153,16 @@ angular.module('prismic.io', [])
         function documents(ids) {
           var deferred = $q.defer();
           if (ids && ids.length) {
-            withPrismic(function(ctx) {
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
-                  return '"' + id + '"';
-                }).join(',') + '])]]').submit(function(docs) {
-                deferred.resolve(docs);
-              });
+            withPrismic(function(error, ctx) {
+              if (ctx) {
+                ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
+                    return '"' + id + '"';
+                  }).join(',') + '])]]').submit(function(docs) {
+                  deferred.resolve(docs);
+                });
+              } else {
+                deferred.reject(error);
+              }
             });
           }
           return deferred.promise;
@@ -154,12 +170,16 @@ angular.module('prismic.io', [])
 
         function bookmarked(bookmark) {
           var id;
-          withPrismic(function(ctx) {
-            id = ctx.api.bookmarks[bookmark];
-            if (id) {
-              return document(id);
+          withPrismic(function(ctx, error) {
+            if (ctx) {
+              id = ctx.api.bookmarks[bookmark];
+              if (id) {
+                return document(id);
+              } else {
+                return $q.promise;
+              }
             } else {
-              return $q.promise;
+              $q.reject(error);
             }
           });
         }
