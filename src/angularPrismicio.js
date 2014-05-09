@@ -135,12 +135,26 @@ angular.module('prismic.io', [])
           return deferred.promise;
         }
 
+        function documentTypes(documentType) {
+          var deferred = $q.defer();
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.type, "' + documentType + '")]]').submit(function(error, types) {
+                types ? deferred.resolve(types) : deferred.reject(error);
+              });
+            } else {
+              deferred.reject(error);
+            }
+          });
+          return deferred.promise;
+        }
+
         function document(id) {
           var deferred = $q.defer();
           withPrismic(function(error, ctx) {
             if (ctx) {
               ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
-                deferred.resolve(docs ? docs[0] : undefined);
+                docs ? deferred.resolve(docs[0]) : deferred.reject(error);
               });
             } else {
               deferred.reject(error);
@@ -186,6 +200,7 @@ angular.module('prismic.io', [])
         Configurer.init(service, config);
         service.all = all;
         service.query = query;
+        service.documentTypes = documentTypes;
         service.document = document;
         service.documents = documents;
         service.bookmark = bookmarked;

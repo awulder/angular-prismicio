@@ -130,6 +130,15 @@ describe('Prismic', function() {
       });
     });
 
+    it('should issue GET documentTypes', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D%5D')
+        .respond(searchResponse());
+
+      Prismic.documentTypes('product').then(function(queryResult) {
+        result = queryResult;
+      });
+    });
+
     it('should issue GET document', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
         .respond(searchResponse());
