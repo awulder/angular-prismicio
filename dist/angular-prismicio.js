@@ -226,11 +226,15 @@ angular.module('prismic.io', [])
         fragment : '=fragment'
       },
       link: function(scope, element, attrs) {
-        var field = $window.Prismic.Fragments.initField(scope.fragment);
-        if(field) {
-          // Use the PrismicProvider configuration for ctx
-          element[0].innerHTML = field.asHtml(Prismic.configuration);
-        }
+        // Watch the fragment, if it changes, change the html
+        scope.$watch('fragment', function(oldVal, newVal) {
+          var field = $window.Prismic.Fragments.initField(scope.fragment);
+          if(field) {
+            // Use the PrismicProvider configuration for ctx
+            var html = field.asHtml(Prismic.configuration);
+            element[0].innerHTML = html;
+          }
+        });
       }
     };
   }]);
