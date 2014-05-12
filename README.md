@@ -10,7 +10,8 @@ You can download it manually by clicking [here to download development unminifie
 
 ## Dependencies
 
-angular-prismicio depends on [Angular](http://angularjs.org/).
+* [Angular](http://angularjs.org/)
+* [Prismic.io SDK](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript)
 
 ## Usage instructions
 
