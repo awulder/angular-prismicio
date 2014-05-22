@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-05-09
+ * @version v0.1.0 - 2014-05-22
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -228,11 +228,13 @@ angular.module('prismic.io', [])
       link: function(scope, element, attrs) {
         // Watch the fragment, if it changes, change the html
         scope.$watch('fragment', function(oldVal, newVal) {
-          var field = $window.Prismic.Fragments.initField(scope.fragment);
-          if(field) {
-            // Use the PrismicProvider configuration for ctx
-            var html = field.asHtml(Prismic.configuration);
-            element[0].innerHTML = html;
+          if (scope.fragment) {
+            var field = $window.Prismic.Fragments.initField(scope.fragment);
+            if(field) {
+              // Use the PrismicProvider configuration for ctx
+              var html = field.asHtml(Prismic.configuration);
+              element[0].innerHTML = html;
+            }
           }
         });
       }
