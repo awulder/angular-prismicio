@@ -143,8 +143,10 @@ describe('Prismic', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
         .respond(searchResponse());
 
+      var expectedResponse = searchResponse();
       Prismic.document(1).then(function(queryResult) {
         result = queryResult;
+        expect(result.id).toEqual(expectedResponse.results[0].id);
       });
     });
 

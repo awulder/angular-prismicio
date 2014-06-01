@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-05-22
+ * @version v0.1.0 - 2014-05-11
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -156,12 +156,17 @@ angular.module('prismic.io', [])
           return deferred.promise;
         }
 
+        /**
+        * Fetch a single item by supplying the id of the document
+        * @param id
+        * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+        */
         function document(id) {
           var deferred = $q.defer();
           withPrismic(function(error, ctx) {
             if (ctx) {
               ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
-                docs ? deferred.resolve(docs[0]) : deferred.reject(error);
+                docs ? deferred.resolve(docs.results[0]) : deferred.reject(error);
               });
             } else {
               deferred.reject(error);
@@ -228,13 +233,11 @@ angular.module('prismic.io', [])
       link: function(scope, element, attrs) {
         // Watch the fragment, if it changes, change the html
         scope.$watch('fragment', function(oldVal, newVal) {
-          if (scope.fragment) {
-            var field = $window.Prismic.Fragments.initField(scope.fragment);
-            if(field) {
-              // Use the PrismicProvider configuration for ctx
-              var html = field.asHtml(Prismic.configuration);
-              element[0].innerHTML = html;
-            }
+          var field = $window.Prismic.Fragments.initField(scope.fragment);
+          if(field) {
+            // Use the PrismicProvider configuration for ctx
+            var html = field.asHtml(Prismic.configuration);
+            element[0].innerHTML = html;
           }
         });
       }
