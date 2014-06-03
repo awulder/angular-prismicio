@@ -111,6 +111,32 @@ angular.module('prismic.io', [])
         var queryString = parseQS($window.location.search.substring(1));
 //        var encodedHash = parseQS($window.location.hash.substring(1));
 
+        function api() {
+          var deferred = $q.defer();
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              deferred.resolve(ctx.api);
+            }
+            else {
+              deferred.reject(error);
+            }
+          });
+          return deferred.promise;
+        }
+
+        function ctx() {
+          var deferred = $q.defer();
+          withPrismic(function(error, ctx) {
+            if (ctx) {
+              deferred.resolve(ctx);
+            }
+            else {
+              deferred.reject(error);
+            }
+          });
+          return deferred.promise;
+        }
+
         function all() {
           var deferred = $q.defer();
           withPrismic(function(error, ctx) {
@@ -203,6 +229,8 @@ angular.module('prismic.io', [])
         }
 
         Configurer.init(service, config);
+        service.api = api;
+        service.ctx = ctx;
         service.all = all;
         service.query = query;
         service.documentTypes = documentTypes;

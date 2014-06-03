@@ -159,6 +159,21 @@ describe('Prismic', function() {
       });
     });
 
+    it('should issue GET advanced query', function(){
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=2&pageSize=10&q=%5B%5B%3Ad%20%3D%20fulltext(document%2C%20%22Bonnes%22)%5D%5D&ref=UkL0hcuvzYUANCrm')
+        .respond(searchResponse());
+
+      Prismic.api().then(function(api){
+        return Prismic.ctx()
+        .then(function(ctx){
+          api.form('everything').query('[[:d = fulltext(document, "Bonnes")]]').pageSize(10).page(2).ref(ctx.ref).submit(function(err, queryResult) {
+            console.log(queryResult);
+            result = queryResult;
+          });
+        });
+      });
+    });
+
 //    it('should issue GET bookmark', function() {
 //      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
 //      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
