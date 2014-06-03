@@ -116,7 +116,7 @@ angular.module('prismic.io', [])
           withPrismic(function(error, ctx) {
             if (ctx) {
               ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-                deferred.resolve(docs);
+                docs ? deferred.resolve(docs) : deferred.reject(error);
               });
             } else {
               deferred.reject(error);
@@ -129,7 +129,7 @@ angular.module('prismic.io', [])
           var deferred = $q.defer();
           withPrismic(function(error, ctx) {
             ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
-              deferred.resolve(docs);
+              docs ? deferred.resolve(docs) : deferred.reject(error);
             });
           });
           return deferred.promise;
