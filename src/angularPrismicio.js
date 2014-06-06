@@ -119,6 +119,13 @@ angular.module('prismic.io', [])
         var queryString = parseQS($window.location.search.substring(1));
 //        var encodedHash = parseQS($window.location.hash.substring(1));
 
+        /**
+         * Builds a useable Api object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.api().then(function(api){ api.form('everything')...... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
         function api() {
           return withPrismic().then(function(ctx) {
             var deferred = $q.defer();
@@ -127,6 +134,13 @@ angular.module('prismic.io', [])
           });
         }
 
+        /**
+         * Builds a useable ctx object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.ctx().then(function(ctx){ ..... ctx.ref ..... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
         function ctx() {
           return withPrismic().then(function(ctx) {
             var deferred = $q.defer();

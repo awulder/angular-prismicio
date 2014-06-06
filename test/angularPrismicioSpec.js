@@ -202,7 +202,6 @@ describe('Prismic', function() {
         return Prismic.ctx()
         .then(function(ctx){
           api.form('everything').query('[[:d = fulltext(document, "Bonnes")]]').pageSize(10).page(2).ref(ctx.ref).submit(function(err, queryResult) {
-            console.log(queryResult);
             result = queryResult;
           });
         });
