@@ -73,6 +73,18 @@ describe('Prismic', function() {
     };
   };
 
+  var expectHttpError = function(promise, httpError) {
+    promise.then(function(result) {
+      expect(result).toBeUndefined();
+    }, function(error) {
+      expect(error.status).toEqual(httpError);
+    });
+  };
+
+  var expectUndefinedError = function(error) {
+    expect(error).toBeUndefined();
+  };
+
   beforeEach(module('prismic.io'));
 
   beforeEach(inject(function(_$httpBackend_, _Prismic_) {
@@ -81,34 +93,48 @@ describe('Prismic', function() {
     Prismic.setApiEndpoint(apiEndpoint);
   }));
 
-  beforeEach(function() {
-    $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
-  });
-
   afterEach(function() {
     $httpBackend.flush()
     $httpBackend.verifyNoOutstandingExpectation();
     $httpBackend.verifyNoOutstandingRequest();
   });
 
-  describe('method descriptions', function() {
+  describe("API home query", function() {
+
+    it("API home should be queried only once", function() {
+      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
+
+      for (var i = 0; i < 4; i++) {
+        $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
+          .respond(searchResponse());
+
+        Prismic.all();
+      }
+
+      // afterEach will fail if API home is called multiple times
+    });
+  });
+
+  describe('Default Prismic queries', function() {
+
+    beforeEach(function() {
+      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
+    });
+
     it('should issue GET query', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D')
         .respond(searchResponse());
 
       Prismic.query('[:d = at(document.type, "product")]').then(function(queryResult) {
-        result = queryResult;
-      });
+        expect(queryResult.results[0].id).toEqual(searchResponse().results[0].id);
+      }, expectUndefinedError());
     });
 
     it('should raise error GET query', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D')
         .respond(404, "Not found");
 
-      Prismic.query('[:d = at(document.type, "product")]').then(function(queryResult) {
-        result = queryResult;
-        expect(result).toBeUndefined();
-      });
+      expectHttpError(Prismic.query('[:d = at(document.type, "product")]'), 404);
     });
 
     it('should issue GET all', function() {
@@ -116,18 +142,15 @@ describe('Prismic', function() {
         .respond(searchResponse());
 
       Prismic.all().then(function(queryResult) {
-        result = queryResult;
-      });
+        expect(queryResult.results[0].id).toEqual(searchResponse().results[0].id);
+      }, expectUndefinedError());
     });
 
     it('should raise error GET all', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
         .respond(404, "Not found");
 
-      Prismic.all().then(function(queryResult) {
-        result = queryResult;
-        expect(result).toBeUndefined();
-      });
+      expectHttpError(Prismic.all(), 404);
     });
 
     it('should issue GET documentTypes', function() {
@@ -135,41 +158,41 @@ describe('Prismic', function() {
         .respond(searchResponse());
 
       Prismic.documentTypes('product').then(function(queryResult) {
-        result = queryResult;
-      });
+        expect(queryResult.results[0].id).toEqual(searchResponse().results[0].id);
+      }, expectUndefinedError());
+    });
+
+    it('should raise error GET documentTypes', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D%5D')
+        .respond(404, "Not found");
+
+      expectHttpError(Prismic.documentTypes('product'), 404);
     });
 
     it('should issue GET document', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
         .respond(searchResponse());
 
-      var expectedResponse = searchResponse();
       Prismic.document(1).then(function(queryResult) {
-        result = queryResult;
-        expect(result.id).toEqual(expectedResponse.results[0].id);
-      });
+        expect(queryResult.id).toEqual(searchResponse().results[0].id);
+      }, expectUndefinedError());
     });
 
-    it('should issue GET documents', function() {
+    it('should raise error GET documents', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
+        .respond(404, "Not found");
+
+      expectHttpError(Prismic.document(1), 404);
+    });
+
+    it('should issue GET bookmark', function() {
+      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%22UkL0gMuvzYUANCpt%22)%5D%5D')
         .respond(searchResponse());
 
-      Prismic.document(1).then(function(queryResult) {
+      Prismic.bookmark('products').then(function(queryResult) {
         result = queryResult;
       });
     });
-
-//    it('should issue GET bookmark', function() {
-//      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
-//      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
-//        .respond();
-//      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
-//        .respond(searchResponse());
-//
-//      Prismic.bookmark('products').then(function(queryResult) {
-//        result = queryResult;
-//      });
-//    });
   });
 });
 
