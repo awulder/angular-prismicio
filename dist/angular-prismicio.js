@@ -124,7 +124,6 @@ angular.module('prismic.io', [])
         }
 
         var queryString = parseQS($window.location.search.substring(1));
-//        var encodedHash = parseQS($window.location.hash.substring(1));
 
         /**
          * Builds a useable Api object to use, as described in the official prismic.io JS kit.
@@ -157,7 +156,7 @@ angular.module('prismic.io', [])
         }
 
         /**
-         * Query all documents from Prismic
+         * Fetch all the items.
          *
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
@@ -178,6 +177,8 @@ angular.module('prismic.io', [])
         }
 
         /**
+         * Fetch all the items by supplying a query.
+         * 
          * @param predicateBasedQuery Prismic predicate
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
@@ -198,6 +199,8 @@ angular.module('prismic.io', [])
         }
 
         /**
+         * Fetch all the items by supplying a document type.
+         * 
          * @param documentType Type of the documents to query
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
@@ -219,7 +222,8 @@ angular.module('prismic.io', [])
         }
 
         /**
-        * Fetch a single item by supplying the id of the document
+        * Fetch a single item by supplying the id of the document.
+        * 
         * @param id
         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
         */
@@ -241,7 +245,8 @@ angular.module('prismic.io', [])
         }
 
         /**
-         * Fetch all items by supplying all ids of the documents
+         * Fetch all items by supplying all ids of the documents.
+         * 
          * @param ids All ids
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
