@@ -207,18 +207,6 @@ describe('Prismic', function() {
         });
       });
     });
-
-//    it('should issue GET bookmark', function() {
-//      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
-//      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
-//        .respond();
-//      $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
-//        .respond(searchResponse());
-//
-//      Prismic.bookmark('products').then(function(queryResult) {
-//        result = queryResult;
-//      });
-//    });
   });
 });
 

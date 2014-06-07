@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-06-06
+ * @version v0.1.0 - 2014-06-07
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
