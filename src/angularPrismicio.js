@@ -120,6 +120,36 @@ angular.module('prismic.io', [])
 //        var encodedHash = parseQS($window.location.hash.substring(1));
 
         /**
+         * Builds a useable Api object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.api().then(function(api){ api.form('everything')...... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function api() {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+            deferred.resolve(ctx.api);
+            return deferred.promise;
+          });
+        }
+
+        /**
+         * Builds a useable ctx object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.ctx().then(function(ctx){ ..... ctx.ref ..... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function ctx() {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+            deferred.resolve(ctx);
+            return deferred.promise;
+          });
+        }
+
+        /**
          * Query all documents from Prismic
          *
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
@@ -245,6 +275,8 @@ angular.module('prismic.io', [])
         }
 
         Configurer.init(service, config);
+        service.api = api;
+        service.ctx = ctx;
         service.all = all;
         service.query = query;
         service.documentTypes = documentTypes;

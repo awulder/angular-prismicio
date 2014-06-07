@@ -55,6 +55,10 @@ These are the methods that can be called on the `Prismic` object:
 * `Prismic.documents(idsArray)`
 * `Prismic.bookmark(bookmarkString)`
 
+Or for more advanced queries using the underlying objects of the JS kit:
+* `Prismic.api()`
+* `Prismic.ctx()`
+
 The prismicHtml-directive can be used as follows
 ````javascript
 <prismic-html fragment="data.fragment"></prismic-html>
