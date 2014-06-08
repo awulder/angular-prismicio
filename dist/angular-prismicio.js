@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-06-07
+ * @version v0.1.0 - 2014-06-08
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -39,6 +39,12 @@ angular.module('prismic.io', [])
       object.setLinkResolver = function(linkResolver) {
         config.linkResolver = linkResolver;
       };
+
+      // Set this to true if you want to use prismic.ios default request handler 
+      config.usePrismicDefaultRequestHandler = angular.isUndefined(config.usePrismicDefaultRequestHandler) ? false : config.usePrismicDefaultRequestHandler;
+      object.setUsePrismicDefaultRequestHandler = function(usePrismicDefaultRequestHandler) {
+        config.usePrismicDefaultRequestHandler = usePrismicDefaultRequestHandler;
+      };
     };
 
     var globalConfiguration = {};
@@ -73,7 +79,7 @@ angular.module('prismic.io', [])
               }
           };
 
-          prismic.Api(config.apiEndpoint, callback, config.accessToken, requestHandler);
+          prismic.Api(config.apiEndpoint, callback, config.accessToken, config.usePrismicDefaultRequestHandler ? undefined : requestHandler);
 
           return deferred.promise;
         }
