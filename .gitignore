@@ -1,5 +1,11 @@
-*.iml
-.idea/
 bower_components/
 node_modules/
 lib/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
