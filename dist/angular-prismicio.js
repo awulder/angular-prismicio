@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-06-04
+ * @version v0.1.0 - 2014-06-08
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -56,7 +56,8 @@ angular.module('prismic.io', [])
       function createService(config) {
         var service = {};
         var prismic = $window.Prismic;
-        var context;
+        var maybeContext;
+        var maybeApi;
 
         function requestHandler(url, callback) {
           $http.get(url).then(
@@ -68,42 +69,49 @@ angular.module('prismic.io', [])
             });
         }
 
-        function getApiHome(callback) {
+        function getApiHome() {
+          var deferred = $q.defer();
+          var callback = function(error, api) {
+              if (api) {
+                  deferred.resolve(api);
+              } else {
+                  deferred.reject(error) ;
+              }
+          };
+
           prismic.Api(config.apiEndpoint, callback, config.accessToken, config.usePrismicDefaultRequestHandler ? undefined : requestHandler);
+
+          return deferred.promise;
         }
 
-        function buildContext(ref, callback) {
-          getApiHome(function(error, api) {
-
-            if (api) {
-              context = {
-                ref: (ref || api.data.master.ref),
-                api: api,
-                maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
-                maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
-                oauth: function() {
+        function buildContext(ref) {
+          maybeApi = getApiHome().then(function(api) {
+            var context = {
+              ref: (ref || api.data.master.ref),
+              api: api,
+              maybeRef: (ref && ref !== api.data.master.ref ? ref : ''),
+              maybeRefParam: (ref && ref !== api.data.master.ref ? '&ref=' + ref : ''),
+              oauth: function() {
                   return {
                     accessToken: config.accessToken,
                     hasPrivilegedAccess: !!config.accessToken
                   };
-                },
-                linkResolver: config.linkResolver
-              };
-              callback(null, context);
-            } else {
-              callback(error, null);
-            }
+              },
+              linkResolver: config.linkResolver
+            };
+            return context;
           });
+          return maybeApi;
         }
 
-        function withPrismic(callback) {
-          if (!context) {
-            buildContext(queryString['ref'], function(error, ctx) {
-              callback(error, ctx);
-            });
-          } else {
-            callback(null, context);
-          }
+        function withPrismic() {
+            if (maybeContext) {
+              // Promise already resolved
+              return maybeContext;
+            } else {
+              maybeContext = buildContext(queryString['ref']);
+              return maybeContext;
+            }
         }
 
         function parseQS(query) {
@@ -122,100 +130,171 @@ angular.module('prismic.io', [])
         }
 
         var queryString = parseQS($window.location.search.substring(1));
-//        var encodedHash = parseQS($window.location.hash.substring(1));
 
-        function all() {
-          var deferred = $q.defer();
-          withPrismic(function(error, ctx) {
-            if (ctx) {
-              ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-                deferred.resolve(docs);
-              });
-            } else {
-              deferred.reject(error);
-            }
+        /**
+         * Builds a useable Api object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.api().then(function(api){ api.form('everything')...... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function api() {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+            deferred.resolve(ctx.api);
+            return deferred.promise;
           });
-          return deferred.promise;
-        }
-
-        function query(predicateBasedQuery) {
-          var deferred = $q.defer();
-          withPrismic(function(error, ctx) {
-            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
-              deferred.resolve(docs);
-            });
-          });
-          return deferred.promise;
-        }
-
-        function documentTypes(documentType) {
-          var deferred = $q.defer();
-          withPrismic(function(error, ctx) {
-            if (ctx) {
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.type, "' + documentType + '")]]').submit(function(error, types) {
-                types ? deferred.resolve(types) : deferred.reject(error);
-              });
-            } else {
-              deferred.reject(error);
-            }
-          });
-          return deferred.promise;
         }
 
         /**
-        * Fetch a single item by supplying the id of the document
-        * @param id
-        * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
-        */
-        function document(id) {
-          var deferred = $q.defer();
-          withPrismic(function(error, ctx) {
-            if (ctx) {
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]').submit(function(error, docs) {
-                docs ? deferred.resolve(docs.results[0]) : deferred.reject(error);
-              });
-            } else {
-              deferred.reject(error);
-            }
+         * Builds a useable ctx object to use, as described in the official prismic.io JS kit.
+         *
+         * For instance: Prismic.ctx().then(function(ctx){ ..... ctx.ref ..... });
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function ctx() {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+            deferred.resolve(ctx);
+            return deferred.promise;
           });
-          return deferred.promise;
         }
 
-        function documents(ids) {
-          var deferred = $q.defer();
-          if (ids && ids.length) {
-            withPrismic(function(error, ctx) {
-              if (ctx) {
-                ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids).map(function(id) {
-                    return '"' + id + '"';
-                  }).join(',') + '])]]').submit(function(docs) {
-                  deferred.resolve(docs);
+        /**
+         * Fetch all the items.
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function all() {
+            return withPrismic().then(function(ctx) {
+                var deferred = $q.defer();
+
+                ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
+                  if (docs) {
+                    deferred.resolve(docs);
+                  } else {
+                    deferred.reject(error);
+                  }
                 });
+
+                return deferred.promise;
+            });
+        }
+
+        /**
+         * Fetch all the items by supplying a query.
+         * 
+         * @param predicateBasedQuery Prismic predicate
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function query(predicateBasedQuery) {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+
+            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
+              if (docs) {
+                deferred.resolve(docs);
               } else {
                 deferred.reject(error);
               }
             });
+
+            return deferred.promise;
+          });
+        }
+
+        /**
+         * Fetch all the items by supplying a document type.
+         * 
+         * @param documentType Type of the documents to query
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function documentTypes(documentType) {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+
+            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.type, "' + documentType + '")]]')
+              .submit(function(error, types) {
+              if (types) {
+                deferred.resolve(types);
+              } else {
+                deferred.reject(error);
+              }
+            });
+
+            return deferred.promise;
+          });
+        }
+
+        /**
+        * Fetch a single item by supplying the id of the document.
+        * 
+        * @param id
+        * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+        */
+        function document(id) {
+          return withPrismic().then(function(ctx) {
+            var deferred = $q.defer();
+  
+            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]')
+              .submit(function(error, docs) {
+              if (docs) {
+                deferred.resolve(docs.results[0]);
+              } else {
+                deferred.reject(error);
+              }
+            });
+
+            return deferred.promise;
+          });
+        }
+
+        /**
+         * Fetch all items by supplying all ids of the documents.
+         * 
+         * @param ids All ids
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function documents(ids) {
+          if (ids && ids.length) {
+            return withPrismic().then(function(ctx) {
+              var deferred = $q.defer();
+
+              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids)
+                .map(function(id) {
+                  return '"' + id + '"';
+                })
+                .join(',') + '])]]')
+                .submit(function(error, docs) {
+                  if (docs) {
+                    deferred.resolve(docs);
+                  } else {
+                    deferred.reject(error);
+                  }
+                });
+
+              return deferred.promise;
+            });
+          } else {
+            $q.reject("Ids must be provided");
           }
-          return deferred.promise;
         }
 
         function bookmarked(bookmark) {
-          var id;
-          withPrismic(function(ctx, error) {
-            if (ctx) {
-              id = ctx.api.bookmarks[bookmark];
-              if (id) {
-                return document(id);
-              } else {
-                return $q.promise;
-              }
+          return withPrismic().then(function(ctx) {
+            var id = ctx.api.bookmarks[bookmark];
+            if (id) {
+              return document(id);
             } else {
-              $q.reject(error);
+              return $q.reject("Bookmark not found");
             }
           });
         }
 
         Configurer.init(service, config);
+        service.api = api;
+        service.ctx = ctx;
         service.all = all;
         service.query = query;
         service.documentTypes = documentTypes;
