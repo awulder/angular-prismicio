@@ -322,4 +322,27 @@ angular.module('prismic.io', [])
         });
       }
     };
+  }])
+
+    // The directive uses prismics asText and can be used as <div prismic-text="data.fragment">
+  .directive('prismicText', ['$window', 'Prismic', function($window, Prismic) {
+    return {
+      restrict: 'A',
+      scope: {
+        prismicText : '='
+      },
+      link: function(scope, element, attrs) {
+        // Watch the fragment, if it changes, change the text
+        scope.$watch('prismicText', function(oldVal, newVal) {
+          if (scope.prismicText) {
+            var field = $window.Prismic.Fragments.initField(scope.prismicText);
+            if(field) {
+              // Use the PrismicProvider configuration for ctx
+              var text = field.asText(Prismic.configuration);
+              element[0].innerHTML = text;
+            }
+          }
+        });
+      }
+    };
   }]);
