@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.1.0 - 2014-06-19
+ * @version v0.1.0 - 2014-07-01
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -324,6 +324,29 @@ angular.module('prismic.io', [])
               // Use the PrismicProvider configuration for ctx
               var html = field.asHtml(Prismic.configuration);
               element[0].innerHTML = html;
+            }
+          }
+        });
+      }
+    };
+  }])
+
+    // The directive uses prismics asText and can be used as <div prismic-text="data.fragment">
+  .directive('prismicText', ['$window', 'Prismic', function($window, Prismic) {
+    return {
+      restrict: 'A',
+      scope: {
+        prismicText : '='
+      },
+      link: function(scope, element, attrs) {
+        // Watch the fragment, if it changes, change the text
+        scope.$watch('prismicText', function(oldVal, newVal) {
+          if (scope.prismicText) {
+            var field = $window.Prismic.Fragments.initField(scope.prismicText);
+            if(field) {
+              // Use the PrismicProvider configuration for ctx
+              var text = field.asText(Prismic.configuration);
+              element[0].innerHTML = text;
             }
           }
         });

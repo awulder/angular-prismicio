@@ -210,13 +210,19 @@ describe('Prismic', function() {
   });
 });
 
-describe('prismicHtml', function() {
+describe('Prismic directives', function() {
   var $scope, $compile, result;
   var fragment = function(type, value) {
     return {
       "type": type,
       "value": value
     }
+  };
+
+  var compileDirective = function (markup, scope) {
+    var el = $compile(markup)(scope);
+    scope.$digest();
+    return el;
   };
 
   beforeEach(module('prismic.io'));
@@ -226,12 +232,7 @@ describe('prismicHtml', function() {
     $compile = _$compile_;
   }));
 
-  describe('directive method descriptions', function() {
-    var compileDirective = function (markup, scope) {
-      var el = $compile(markup)(scope);
-      scope.$digest();
-      return el;
-    };
+  describe('prismic html method descriptions', function() {
 
     it('should contain <span> when type is Text', function() {
       $scope.fragment = fragment("Text", "Some value");
@@ -255,6 +256,25 @@ describe('prismicHtml', function() {
       result = imageType[0];
       expect(result.innerHTML).toContain("<img");
     });
+
+  });
+
+  describe('prismic text method descriptions', function() {
+
+    it('should contain fragments value text when type is Text', function() {
+      $scope.fragment = fragment("Text", "Some value");
+      var textType = compileDirective('<div prismic-text="fragment"></prismic-html>', $scope);
+      result = textType[0];
+      expect(result.innerHTML).toContain($scope.fragment.value);
+    });
+
+    it('should contain link as text when type is Link.web', function() {
+      $scope.fragment = fragment("Link.web", { url : "http://prismic.io" });
+      var textType = compileDirective('<div prismic-text="fragment"></prismic-html>', $scope);
+      result = textType[0];
+      expect(result.innerHTML).toContain($scope.fragment.value.url);
+    });
+
   });
 
 });

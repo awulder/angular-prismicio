@@ -65,6 +65,13 @@ The prismicHtml-directive can be used as follows
 ````
 where 'fragment' is a prismic.io type/value object.
 
+The prismicText-directive can be used as follows
+````javascript
+<div prismic-text="data.fragment"></div>
+````
+where 'fragment' is a prismic.io type/value object.
+
+
 ## Contributting
 New contributions are always welcomed. Just open a pull request making sure that it contains tests and documentation updates.
 
