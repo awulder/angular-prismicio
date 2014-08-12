@@ -155,39 +155,25 @@ angular.module('prismic.io', [])
         }
 
         /**
-         * Fetch all the items.
-         *
-         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
-         */
-        function all() {
-            return withPrismic().then(function(ctx) {
-                var deferred = $q.defer();
-
-                ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-                  if (docs) {
-                    deferred.resolve(docs);
-                  } else {
-                    deferred.reject(error);
-                  }
-                });
-
-                return deferred.promise;
-            });
-        }
-
-        /**
-         * Fetch all the items by supplying a query.
+         * Fetch all the items by supplying configuration
          * 
-         * @param predicateBasedQuery Prismic predicate
+         * @param predicateBasedQuery Prismic predicate (mandatory), but empty predicate leads to Prismic's query without predicate.
+         * @param resultExtraction function to extract result from Prismic result (mandatory)
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
-        function query(predicateBasedQuery) {
+        function queryWithConfiguration(predicate, resultExtractor) {
           return withPrismic().then(function(ctx) {
             var deferred = $q.defer();
 
-            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
+            var searchForm = ctx.api.forms('everything').ref(ctx.ref);
+
+            if ("" !== predicate) {
+              searchForm = searchForm.query(predicate);
+            }
+
+            searchForm.submit(function(error, docs) {
               if (docs) {
-                deferred.resolve(docs);
+                deferred.resolve(resultExtractor(docs));
               } else {
                 deferred.reject(error);
               }
@@ -195,6 +181,25 @@ angular.module('prismic.io', [])
 
             return deferred.promise;
           });
+        }
+
+        /**
+         * Fetch all the items.
+         *
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function all() {
+            return query("");
+        }
+
+        /**
+         * Fetch all the items by supplying a query.
+         * 
+         * @param predicateBasedQuery Prismic predicate. Empty predicate leads to Prismic's query without predicate (see #all())
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function query(predicateBasedQuery) {
+          return queryWithConfiguration(predicateBasedQuery, function(docs) { return docs; });
         }
 
         /**
@@ -204,20 +209,8 @@ angular.module('prismic.io', [])
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
         function documentTypes(documentType) {
-          return withPrismic().then(function(ctx) {
-            var deferred = $q.defer();
-
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.type, "' + documentType + '")]]')
-              .submit(function(error, types) {
-              if (types) {
-                deferred.resolve(types);
-              } else {
-                deferred.reject(error);
-              }
-            });
-
-            return deferred.promise;
-          });
+          var predicate = '[[:d = at(document.type, "' + documentType + '")]]';
+          return query(predicate);
         }
 
         /**
@@ -227,20 +220,8 @@ angular.module('prismic.io', [])
         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
         */
         function document(id) {
-          return withPrismic().then(function(ctx) {
-            var deferred = $q.defer();
-  
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]')
-              .submit(function(error, docs) {
-              if (docs) {
-                deferred.resolve(docs.results[0]);
-              } else {
-                deferred.reject(error);
-              }
-            });
-
-            return deferred.promise;
-          });
+          var predicate = '[[:d = at(document.id, "' + id + '")]]';
+          return queryWithConfiguration(predicate, function(docs) { return docs.results[0]; })
         }
 
         /**
@@ -251,24 +232,14 @@ angular.module('prismic.io', [])
          */
         function documents(ids) {
           if (ids && ids.length) {
-            return withPrismic().then(function(ctx) {
-              var deferred = $q.defer();
 
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids)
-                .map(function(id) {
-                  return '"' + id + '"';
-                })
-                .join(',') + '])]]')
-                .submit(function(error, docs) {
-                  if (docs) {
-                    deferred.resolve(docs);
-                  } else {
-                    deferred.reject(error);
-                  }
-                });
+            var predicate = '[[:d = any(document.id, [' + 
+              (ids).map(function(id) {
+                return '"' + id + '"';
+              })
+              .join(',') + '])]]';
 
-              return deferred.promise;
-            });
+            return query(predicate);
           } else {
             $q.reject("Ids must be provided");
           }
