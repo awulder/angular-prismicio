@@ -99,9 +99,9 @@ describe('Prismic', function() {
     $httpBackend.verifyNoOutstandingRequest();
   });
 
-  describe("API home query", function() {
+  describe('API home query', function() {
 
-    it("API home should be queried only once", function() {
+    it('should query API home only once', function() {
       $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
 
       for (var i = 0; i < 4; i++) {
@@ -132,7 +132,7 @@ describe('Prismic', function() {
 
     it('should raise error GET query', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.query('[:d = at(document.type, "product")]'), 404);
     });
@@ -159,7 +159,7 @@ describe('Prismic', function() {
 
     it('should raise error GET all', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.all(), 404);
     });
@@ -186,7 +186,7 @@ describe('Prismic', function() {
 
     it('should raise error GET query', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.query('[[:d = at(document.type, "product")]]'), 404);
     });
@@ -202,7 +202,7 @@ describe('Prismic', function() {
 
     it('should raise error GET documentTypes', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.documentTypes('product'), 404);
     });
@@ -218,7 +218,7 @@ describe('Prismic', function() {
 
     it('should raise error GET documents', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.id%2C%20%221%22)%5D%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.document(1), 404);
     });
@@ -256,7 +256,7 @@ describe('Prismic', function() {
 
     it('should raise error GET document with pagination', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=2&pageSize=50&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20at(document.type%2C%20%22product%22)%5D%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
         var promiseWithError = Prismic.documentTypes('product', function(searchForm){
           return searchForm.page(2).pageSize(50);
@@ -287,7 +287,7 @@ describe('Prismic', function() {
 
     it('should raise error GET documents', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=1&pageSize=20&ref=UkL0hcuvzYUANCrm&q=%5B%5B%3Ad%20%3D%20any(document.id%2C%20%5B%221%22%5D)%5D%5D')
-        .respond(404, "Not found");
+        .respond(404, 'Not found');
 
       expectHttpError(Prismic.documents([1]), 404);
     });
@@ -308,12 +308,13 @@ describe('Prismic', function() {
   });
 });
 
-describe('prismicHtml', function() {
+describe('Directive: prismicHtml', function() {
   var $scope, $compile, result;
+
   var fragment = function(type, value) {
     return {
-      "type": type,
-      "value": value
+      'type': type,
+      'value': value
     }
   };
 
@@ -324,34 +325,55 @@ describe('prismicHtml', function() {
     $compile = _$compile_;
   }));
 
-  describe('directive method descriptions', function() {
-    var compileDirective = function (markup, scope) {
-      var el = $compile(markup)(scope);
-      scope.$digest();
-      return el;
-    };
+  var compileDirective = function(markup, scope) {
+    var el = $compile(markup)(scope);
+    scope.$digest();
+    return el;
+  };
 
-    it('should contain <span> when type is Text', function() {
-      $scope.fragment = fragment("Text", "Some value");
-      var textType = compileDirective('<prismic-html fragment="fragment"></prismic-html>', $scope);
-      result = textType[0];
-      expect(result.innerHTML).toContain("<span");
-    });
+  function containsSpanElementWhenTypeIsText(htmlFragment) {
+    $scope.fragment = fragment('Text', 'Some value');
+    var textType = compileDirective(htmlFragment, $scope);
+    result = textType[0];
+    expect(result.innerHTML).toContain('<span');
+  }
 
-    it('should contain <img> when type is Image', function() {
-      $scope.fragment = fragment("Image", {
+  function containsImgElementWhenTypeIsImage(htmlFragment) {
+    $scope.fragment = fragment('Image', {
        main: {
-        alt: "",
-        copyright: "",
+        alt: '',
+        copyright: '',
         dimensions: {
           height: 500,
           width: 500
         },
-        url: "https://prismic-io.s3.amazonaws.com/lesbonneschoses/604400b41b2e275ee766bd69b69b33734043aa38.png"
-        }});
-      var imageType = compileDirective('<prismic-html fragment="fragment"></prismic-html>', $scope);
-      result = imageType[0];
-      expect(result.innerHTML).toContain("<img");
+        url: 'https://prismic-io.s3.amazonaws.com/lesbonneschoses/604400b41b2e275ee766bd69b69b33734043aa38.png'
+      }
+    });
+    var imageType = compileDirective(htmlFragment, $scope);
+    result = imageType[0];
+    expect(result.innerHTML).toContain('<img');
+  }
+
+  describe('directive used as element', function() {
+
+    it('should contain <span> when type is Text', function() {
+      containsSpanElementWhenTypeIsText('<prismic-html fragment="fragment"></prismic-html>');
+    });
+
+    it('should contain <img> when type is Image', function() {
+      containsImgElementWhenTypeIsImage('<prismic-html fragment="fragment"></prismic-html>');
+    });
+  });
+
+  describe('directive used as attribute', function() {
+
+    it('should contain <span> when type is Text', function() {
+      containsSpanElementWhenTypeIsText('<div prismic-html fragment="fragment"></div>');
+    });
+
+    it('should contain <img> when type is Image', function() {
+      containsImgElementWhenTypeIsImage('<div prismic-html fragment="fragment"></div>');
     });
   });
 

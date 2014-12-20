@@ -63,6 +63,10 @@ The prismicHtml-directive can be used as follows
 ````javascript
 <prismic-html fragment="data.fragment"></prismic-html>
 ````
+or as
+````javascript
+<div prismic-html fragment="data.fragment"></div>
+````
 where 'fragment' is a prismic.io type/value object.
 
 ## Contributting

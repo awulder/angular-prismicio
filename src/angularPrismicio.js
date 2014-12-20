@@ -33,7 +33,7 @@ angular.module('prismic.io', [])
         config.linkResolver = linkResolver;
       };
 
-      // Set this to true if you want to use prismic.ios default request handler 
+      // Set this to true if you want to use prismic.ios default request handler
       config.usePrismicDefaultRequestHandler = angular.isUndefined(config.usePrismicDefaultRequestHandler) ? false : config.usePrismicDefaultRequestHandler;
       object.setUsePrismicDefaultRequestHandler = function(usePrismicDefaultRequestHandler) {
         config.usePrismicDefaultRequestHandler = usePrismicDefaultRequestHandler;
@@ -156,7 +156,7 @@ angular.module('prismic.io', [])
 
         /**
          * Fetch all the items by supplying configuration.
-         * 
+         *
          * @param {string} predicate Prismic predicate (mandatory), but empty predicate leads to Prismic's query without predicate.
          * @param resultExtraction Mandatory function (results -> *) to extract your result from Prismic results (mandatory)
          * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
@@ -207,14 +207,14 @@ angular.module('prismic.io', [])
 
         /**
          * Fetch all the items by supplying a query predicate.
-         * 
+         *
          * For instance:
          *   Prismic.query('[[:d = at(document.type, "product")]]').then(...)
-         * 
+         *
          *   Prismic.query('[[:d = at(document.type, "product")]]', function(searchForm) {
          *     return searchForm.page(5).pageSize(60);
          *   }).then(...)
-         * 
+         *
          * @param {string} predicate Prismic predicate (mandatory). Empty predicate leads to Prismic's query without predicate (see #all())
          * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
@@ -229,7 +229,7 @@ angular.module('prismic.io', [])
          * For instance:
          *
          *   Prismic.documentTypes('product').then(...)
-         * 
+         *
          * @param documentType Type of the documents to query
          * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
@@ -241,7 +241,7 @@ angular.module('prismic.io', [])
 
         /**
         * Fetch a single item by supplying the id of the document.
-        * 
+        *
         * @param id Prismic id
         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
         */
@@ -257,7 +257,7 @@ angular.module('prismic.io', [])
          *   Prismic.documents([...], function(searchForm) {
          *     return searchForm.page(3).pageSize(10);
          *   }).then(...)
-         * 
+         *
          * @param {string[]} ids All ids
          * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
@@ -265,7 +265,7 @@ angular.module('prismic.io', [])
         function documents(ids, additionalSearchParams) {
           if (ids && ids.length) {
 
-            var predicate = '[[:d = any(document.id, [' + 
+            var predicate = '[[:d = any(document.id, [' +
               (ids).map(function(id) {
                 return '"' + id + '"';
               })
@@ -304,10 +304,13 @@ angular.module('prismic.io', [])
     }];
   })
 
-  // The directive uses prismics asHtml and can be used as <prismic-html fragment="data.fragment">
+  /**
+   * The directive uses prismics asHtml and can be used as <prismic-html fragment="data.fragment"> or
+   * as <div prismic-html fragment="data.fragment">
+   */
   .directive('prismicHtml', ['$window', 'Prismic', function($window, Prismic) {
     return {
-      restrict: 'E',
+      restrict: 'AE',
       scope: {
         fragment : '=fragment'
       },
