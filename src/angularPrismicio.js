@@ -155,39 +155,30 @@ angular.module('prismic.io', [])
         }
 
         /**
-         * Fetch all the items.
-         *
-         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
-         */
-        function all() {
-            return withPrismic().then(function(ctx) {
-                var deferred = $q.defer();
-
-                ctx.api.form('everything').ref(ctx.ref).submit(function(error, docs) {
-                  if (docs) {
-                    deferred.resolve(docs);
-                  } else {
-                    deferred.reject(error);
-                  }
-                });
-
-                return deferred.promise;
-            });
-        }
-
-        /**
-         * Fetch all the items by supplying a query.
+         * Fetch all the items by supplying configuration.
          * 
-         * @param predicateBasedQuery Prismic predicate
+         * @param {string} predicate Prismic predicate (mandatory), but empty predicate leads to Prismic's query without predicate.
+         * @param resultExtraction Mandatory function (results -> *) to extract your result from Prismic results (mandatory)
+         * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
-        function query(predicateBasedQuery) {
+        function queryWithConfiguration(predicate, resultExtractor, additionalSearchParams) {
           return withPrismic().then(function(ctx) {
             var deferred = $q.defer();
 
-            ctx.api.forms('everything').ref(ctx.ref).query(predicateBasedQuery).submit(function(error, docs) {
+            var searchForm = ctx.api.forms('everything').ref(ctx.ref);
+
+            if ("" !== predicate) {
+              searchForm = searchForm.query(predicate);
+            }
+
+            if (additionalSearchParams) {
+              searchForm = additionalSearchParams(searchForm);
+            }
+
+            searchForm.submit(function(error, docs) {
               if (docs) {
-                deferred.resolve(docs);
+                deferred.resolve(resultExtractor(docs));
               } else {
                 deferred.reject(error);
               }
@@ -195,80 +186,92 @@ angular.module('prismic.io', [])
 
             return deferred.promise;
           });
+        }
+
+        /**
+         * Fetch all the items.
+         *
+         * For instance:
+         *     Prismic.all().then(...)
+         *
+         *     Prismic.all(function(searchForm) {
+         *       return searchForm.page(3).pageSize(50);
+         *     }).then(...)
+         *
+         * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function all(additionalSearchParams) {
+            return query("", additionalSearchParams);
+        }
+
+        /**
+         * Fetch all the items by supplying a query predicate.
+         * 
+         * For instance:
+         *   Prismic.query('[[:d = at(document.type, "product")]]').then(...)
+         * 
+         *   Prismic.query('[[:d = at(document.type, "product")]]', function(searchForm) {
+         *     return searchForm.page(5).pageSize(60);
+         *   }).then(...)
+         * 
+         * @param {string} predicate Prismic predicate (mandatory). Empty predicate leads to Prismic's query without predicate (see #all())
+         * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function query(predicate, additionalSearchParams) {
+          return queryWithConfiguration(predicate, function(docs) { return docs; }, additionalSearchParams);
         }
 
         /**
          * Fetch all the items by supplying a document type.
+         *
+         * For instance:
+         *
+         *   Prismic.documentTypes('product').then(...)
          * 
          * @param documentType Type of the documents to query
+         * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
-        function documentTypes(documentType) {
-          return withPrismic().then(function(ctx) {
-            var deferred = $q.defer();
-
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.type, "' + documentType + '")]]')
-              .submit(function(error, types) {
-              if (types) {
-                deferred.resolve(types);
-              } else {
-                deferred.reject(error);
-              }
-            });
-
-            return deferred.promise;
-          });
+        function documentTypes(documentType, additionalSearchParams) {
+          var predicate = '[[:d = at(document.type, "' + documentType + '")]]';
+          return query(predicate, additionalSearchParams);
         }
 
         /**
         * Fetch a single item by supplying the id of the document.
         * 
-        * @param id
+        * @param id Prismic id
         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
         */
         function document(id) {
-          return withPrismic().then(function(ctx) {
-            var deferred = $q.defer();
-  
-            ctx.api.form('everything').ref(ctx.ref).query('[[:d = at(document.id, "' + id + '")]]')
-              .submit(function(error, docs) {
-              if (docs) {
-                deferred.resolve(docs.results[0]);
-              } else {
-                deferred.reject(error);
-              }
-            });
-
-            return deferred.promise;
-          });
+          var predicate = '[[:d = at(document.id, "' + id + '")]]';
+          return queryWithConfiguration(predicate, function(docs) { return docs.results[0]; });
         }
 
         /**
          * Fetch all items by supplying all ids of the documents.
+         * For instance:
+         *
+         *   Prismic.documents([...], function(searchForm) {
+         *     return searchForm.page(3).pageSize(10);
+         *   }).then(...)
          * 
-         * @param ids All ids
+         * @param {string[]} ids All ids
+         * @param additionalSearchParams Optional function (SearchForm -> SearchForm) to add additional Prismic search parameters, such as 'page(), pageSize() or orderings()'.
          * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
          */
-        function documents(ids) {
+        function documents(ids, additionalSearchParams) {
           if (ids && ids.length) {
-            return withPrismic().then(function(ctx) {
-              var deferred = $q.defer();
 
-              ctx.api.form('everything').ref(ctx.ref).query('[[:d = any(document.id, [' + (ids)
-                .map(function(id) {
-                  return '"' + id + '"';
-                })
-                .join(',') + '])]]')
-                .submit(function(error, docs) {
-                  if (docs) {
-                    deferred.resolve(docs);
-                  } else {
-                    deferred.reject(error);
-                  }
-                });
+            var predicate = '[[:d = any(document.id, [' + 
+              (ids).map(function(id) {
+                return '"' + id + '"';
+              })
+              .join(',') + '])]]';
 
-              return deferred.promise;
-            });
+            return query(predicate, additionalSearchParams);
           } else {
             $q.reject("Ids must be provided");
           }
