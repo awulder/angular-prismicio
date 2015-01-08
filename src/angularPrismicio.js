@@ -53,7 +53,14 @@ angular.module('prismic.io', [])
         var maybeApi;
 
         function requestHandler(url, callback) {
-          $http.get(url).then(
+
+          var configHttp = {
+            headers: {
+              'Accept': 'application/json'
+            }
+          };
+
+          $http.get(url, configHttp).then(
             function(response) {
               callback(null, response.data);
             },
