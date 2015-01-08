@@ -1,6 +1,6 @@
 /**
  * AngularJS service for prismic.io
- * @version v0.3.0 - 2014-12-20
+ * @version v0.3.0 - 2015-01-08
  * @link 
  * @author Arjan Wulder <arjanwulder@gmail.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -60,7 +60,14 @@ angular.module('prismic.io', [])
         var maybeApi;
 
         function requestHandler(url, callback) {
-          $http.get(url).then(
+
+          var configHttp = {
+            headers: {
+              'Accept': 'application/json'
+            }
+          };
+
+          $http.get(url, configHttp).then(
             function(response) {
               callback(null, response.data);
             },
