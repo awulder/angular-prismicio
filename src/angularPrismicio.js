@@ -38,6 +38,13 @@ angular.module('prismic.io', [])
       object.setUsePrismicDefaultRequestHandler = function(usePrismicDefaultRequestHandler) {
         config.usePrismicDefaultRequestHandler = usePrismicDefaultRequestHandler;
       };
+
+      // This value is defined on Prismic "API & Security" configuration page, associated with the "client_id"
+      // Example: "master", "master+releases", ...
+      config.oauthScope = angular.isUndefined(config.oauthScope) ? '' : config.oauthScope;
+      object.setOAuthScope = function(oauthScope) {
+        config.oauthScope = oauthScope;
+      };
     };
 
     var globalConfiguration = {};
@@ -158,6 +165,32 @@ angular.module('prismic.io', [])
             var deferred = $q.defer();
             deferred.resolve(ctx);
             return deferred.promise;
+          });
+        }
+
+        /**
+         * Get the OAuth authentification URL on Prismic web site.
+         *
+         * For instance: Prismic.getAuthenticationUrl(redirectUrl).then(function(url){ ..... });
+         *
+         * clientId and oauthScope must be provided.
+         *
+         * @param {string} maybeRedirectUri Optional URI where to redirect after Prismic's authentication. This URL must
+         * be registered as authorized in "API & Security" configuration page of your Prismic instance. If not provided,
+         * current window.locatin URL is used.
+         * @returns {ng.IPromise<T>|promise|*|Promise.promise|Q.promise}
+         */
+        function authenticationUrl(maybeRedirectUri) {
+          return api().then(function(api) {
+            // Use current URL if redirect URI is not provided
+            var redirectUri = maybeRedirectUri || $window.location;
+
+            var url = api.data.oauthInitiate +
+              "?response_type=token" +
+              "&client_id=" + encodeURIComponent(config.clientId) +
+              "&redirect_uri=" + encodeURIComponent(redirectUri) +
+              "&scope=" + encodeURIComponent(config.oauthScope);
+            return $q.when(url);
           });
         }
 
@@ -298,6 +331,7 @@ angular.module('prismic.io', [])
         Configurer.init(service, config);
         service.api = api;
         service.ctx = ctx;
+        service.authenticationUrl = authenticationUrl;
         service.all = all;
         service.query = query;
         service.documentTypes = documentTypes;

@@ -1,7 +1,7 @@
 'use strict';
 
 describe('Prismic', function() {
-  var $httpBackend, Prismic, result;
+  var $httpBackend, Prismic, result, $window;
 
   var apiEndpoint = 'https://lesbonneschoses.prismic.io/api';
 
@@ -73,6 +73,10 @@ describe('Prismic', function() {
     };
   };
 
+  var clientId = "6q1sdgdd68f1g";
+
+  var scope = "master+releases";
+
   var expectHttpError = function(promise, httpError) {
     promise.then(function(result) {
       expect(result).toBeUndefined();
@@ -87,10 +91,14 @@ describe('Prismic', function() {
 
   beforeEach(module('prismic.io'));
 
-  beforeEach(inject(function(_$httpBackend_, _Prismic_) {
+  beforeEach(inject(function(_$httpBackend_, _Prismic_, _$window_) {
     $httpBackend = _$httpBackend_;
     Prismic = _Prismic_;
+    $window = _$window_;
+
     Prismic.setApiEndpoint(apiEndpoint);
+    Prismic.setClientId(clientId);
+    Prismic.setOAuthScope(scope);
   }));
 
   afterEach(function() {
@@ -292,7 +300,7 @@ describe('Prismic', function() {
       expectHttpError(Prismic.documents([1]), 404);
     });
 
-    it('should issue GET advanced query', function(){
+    it('should issue GET advanced query', function() {
       $httpBackend.expectGET(apiEndpoint + '/documents/search?page=2&pageSize=10&q=%5B%5B%3Ad%20%3D%20fulltext(document%2C%20%22Bonnes%22)%5D%5D&ref=UkL0hcuvzYUANCrm')
         .respond(searchResponse());
 
@@ -306,6 +314,41 @@ describe('Prismic', function() {
       });
     });
   });
+
+  describe('OAuth tests', function() {
+
+    beforeEach(function() {
+      $httpBackend.expectGET(apiEndpoint).respond(contextResponse());
+    });
+
+    it('should get a factory to build oauth authentification URL on Prismic with a specified redirect URI', function() {
+      var redirectUri = "http://redirectUri:port/path";
+
+      var expectedUrl = contextResponse().oauth_initiate + "?response_type=token&client_id=" + clientId +
+        "&redirect_uri=" + encodeURIComponent(redirectUri) +
+        "&scope=" + encodeURIComponent(scope);
+
+      Prismic.authenticationUrl(redirectUri).then(
+        function success(url) {
+          expect(url).toBe(expectedUrl);
+        }, expectUndefinedError()
+      );
+    });
+
+    it('should get a factory to build oauth authentification URL on Prismic without redirect URI', function() {
+      var expectedUrl = contextResponse().oauth_initiate + "?response_type=token&client_id=" + clientId +
+        "&redirect_uri=" + encodeURIComponent($window.location) +
+        "&scope=" + encodeURIComponent(scope);
+
+      Prismic.authenticationUrl().then(
+        function success(url) {
+          expect(url).toBe(expectedUrl);
+        }, expectUndefinedError()
+      );
+
+    });
+  });
+
 });
 
 describe('Directive: prismicHtml', function() {
