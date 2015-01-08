@@ -59,6 +59,12 @@ Or for more advanced queries using the underlying objects of the JS kit:
 * `Prismic.api()`
 * `Prismic.ctx()`
 
+### OAuth methods
+
+* `Prismic.authenticationUrl(maybeRedirectUri)` : get the OAuth authentification URL on Prismic web site
+
+### Prismic directives
+
 The prismicHtml-directive can be used as follows
 ````javascript
 <prismic-html fragment="data.fragment"></prismic-html>
