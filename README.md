@@ -19,7 +19,7 @@ First you need to configure the `PrismicProvider`. You can configure the followi
 
 * API Endpoint (`setApiEndpoint`)
 * Access token if the Master is not open (`setAccessToken`)
-* OAuth (`setClientId`, `setClientSecret`)
+* OAuth (`setClientId`, `setClientSecret`, `setOAuthScope`)
 * Links resolution rules (`setLinkResolver`)
 
 You can configure the `PrismicProvider` in the `config`
@@ -61,7 +61,7 @@ Or for more advanced queries using the underlying objects of the JS kit:
 
 ### OAuth methods
 
-* `Prismic.authenticationUrl(maybeRedirectUri)` : get the OAuth authentification URL on Prismic web site
+* `Prismic.authenticationUrl(maybeRedirectUri)` : get the OAuth authentication URL on Prismic web site
 
 ### Prismic directives
 
