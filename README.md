@@ -11,7 +11,7 @@ You can download it manually by clicking [here to download development unminifie
 ## Dependencies
 
 * [Angular](http://angularjs.org/)
-* [Prismic.io SDK](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript)
+* [Prismic.io SDK](https://developers.prismic.io/documentation/VBgeDDYAADMAz2Rw/developers-manual)
 
 ## Usage instructions
 
